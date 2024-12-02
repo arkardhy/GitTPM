@@ -8,6 +8,16 @@ import { validateEmployeeId, validateWorkingHoursData } from './validation';
 import type { WorkingHours } from '../types';
 
 export const workingHoursService = {
+  async create(employeeId: string, data: Partial<WorkingHours>): Promise<WorkingHours> {
+    validateEmployeeId(employeeId);
+    validateWorkingHoursData({
+      date: data.date,
+      checkIn: data.checkIn,
+      checkOut: data.checkOut,
+    });
+    return apiCheckIn(employeeId, data.date!, data.checkIn!);
+  },
+
   async checkIn(employeeId: string, date: string, checkIn: string): Promise<WorkingHours> {
     validateEmployeeId(employeeId);
     validateWorkingHoursData({ date, checkIn });
