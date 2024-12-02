@@ -19,6 +19,29 @@ export const workingHoursService = {
     return (data || []).map(transformWorkingHoursData);
   },
 
+  async create(employeeId: string, entry: Partial<WorkingHours>): Promise<WorkingHours> {
+    validateEmployeeId(employeeId);
+    validateWorkingHoursData(entry);
+
+    const { data, error } = await supabase
+      .from('working_hours')
+      .insert({
+        employee_id: employeeId,
+        date: entry.date,
+        check_in: entry.checkIn,
+        check_out: entry.checkOut,
+        total_hours: entry.totalHours,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to create working hours record: ${error.message}`);
+    }
+
+    return transformWorkingHoursData(data);
+  },
+
   async checkIn(employeeId: string, date: string, checkIn: string): Promise<WorkingHours> {
     validateEmployeeId(employeeId);
     validateWorkingHoursData({ date, checkIn });
@@ -56,10 +79,6 @@ export const workingHoursService = {
           throw new Error('Employee already has an active duty session');
         }
         throw new Error(`Failed to create working hours record: ${error.message}`);
-      }
-
-      if (!data) {
-        throw new Error('Failed to create working hours record: No data returned');
       }
 
       return transformWorkingHoursData(data);
@@ -110,10 +129,6 @@ export const workingHoursService = {
         throw new Error(`Failed to update working hours record: ${error.message}`);
       }
 
-      if (!data) {
-        throw new Error('Failed to update working hours record: No data returned');
-      }
-
       return transformWorkingHoursData(data);
     } catch (error) {
       if (error instanceof Error) {
@@ -132,6 +147,7 @@ export const workingHoursService = {
       const { data, error } = await supabase
         .from('working_hours')
         .update({
+          date: updates.date,
           check_in: updates.checkIn,
           check_out: updates.checkOut,
           total_hours: updates.totalHours,
@@ -144,16 +160,34 @@ export const workingHoursService = {
         throw new Error(`Failed to update working hours record: ${error.message}`);
       }
 
-      if (!data) {
-        throw new Error('Failed to update working hours record: No data returned');
-      }
-
       return transformWorkingHoursData(data);
     } catch (error) {
       if (error instanceof Error) {
         throw error;
       }
       throw new Error('An unexpected error occurred while updating time entry');
+    }
+  },
+
+  async delete(id: string): Promise<void> {
+    if (!id) {
+      throw new Error('Working hours ID is required');
+    }
+
+    try {
+      const { error } = await supabase
+        .from('working_hours')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        throw new Error(`Failed to delete working hours record: ${error.message}`);
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error('An unexpected error occurred while deleting time entry');
     }
   },
 

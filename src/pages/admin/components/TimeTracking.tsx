@@ -1,12 +1,13 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Calendar, Clock, Edit2 } from 'lucide-react';
+import { Calendar, Clock, Edit2, Trash2, Plus } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
 import { employeeService } from '../../../services/employeeService';
 import { workingHoursService } from '../../../services/workingHoursService';
 import { exportToCSV } from '../../../utils/csv';
 import { formatDuration } from '../../../utils/time';
-import { TimeEditModal } from '../../../components/ui/TimeEditModal';
+import { TimeEntryModal } from '../../../components/ui/TimeEntryModal';
 import { SearchBar } from '../../../components/ui/SearchBar';
+import { Button } from '../../../components/ui/Button';
 import type { Employee, WorkingHours } from '../../../types';
 
 export function TimeTracking() {
@@ -16,6 +17,8 @@ export function TimeTracking() {
   const [error, setError] = useState<string | null>(null);
   const [selectedEntry, setSelectedEntry] = useState<WorkingHours | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
@@ -86,17 +89,43 @@ export function TimeTracking() {
   };
 
   const handleEditClick = (entry: WorkingHours, employee: Employee) => {
-    setSelectedEntry({ ...entry, employeeName: employee.name });
+    setSelectedEntry(entry);
+    setSelectedEmployee(employee);
     setShowEditModal(true);
   };
 
-  const handleSaveTimeEntry = async (updatedEntry: WorkingHours) => {
+  const handleDelete = async (entry: WorkingHours) => {
+    if (!confirm('Are you sure you want to delete this time entry?')) {
+      return;
+    }
+
     try {
-      await workingHoursService.updateTimeEntry(updatedEntry.id, updatedEntry);
+      await workingHoursService.delete(entry.id);
       await loadEmployees();
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update time entry');
+      setError(err instanceof Error ? err.message : 'Failed to delete time entry');
+    }
+  };
+
+  const handleSaveTimeEntry = async (updatedEntry: Partial<WorkingHours>) => {
+    try {
+      if (selectedEntry) {
+        await workingHoursService.updateTimeEntry(selectedEntry.id, {
+          ...selectedEntry,
+          ...updatedEntry,
+        });
+      } else if (selectedEmployee) {
+        await workingHoursService.create(selectedEmployee.id, updatedEntry);
+      }
+      await loadEmployees();
+      setError(null);
+      setShowEditModal(false);
+      setShowAddModal(false);
+      setSelectedEntry(null);
+      setSelectedEmployee(null);
+    } catch (err) {
+      throw err;
     }
   };
 
@@ -124,14 +153,26 @@ export function TimeTracking() {
                 type="month"
                 value={selectedMonth}
                 onChange={(e) => setSelectedMonth(e.target.value)}
-                className="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                className="rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
               />
-              <button
+              <Button
+                onClick={() => {
+                  setSelectedEntry(null);
+                  setSelectedEmployee(null);
+                  setShowAddModal(true);
+                }}
+                className="inline-flex items-center"
+              >
+                <Plus className="h-5 w-5 mr-2" />
+                Add Entry
+              </Button>
+              <Button
                 onClick={handleExportCSV}
-                className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                variant="secondary"
+                className="inline-flex items-center"
               >
                 Export CSV
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -181,12 +222,20 @@ export function TimeTracking() {
                         {formatDuration(hours.totalHours)}
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        <button
-                          onClick={() => handleEditClick(hours, employee)}
-                          className="text-indigo-600 hover:text-indigo-900"
-                        >
-                          <Edit2 className="h-5 w-5" />
-                        </button>
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => handleEditClick(hours, employee)}
+                            className="text-indigo-600 hover:text-indigo-900"
+                          >
+                            <Edit2 className="h-5 w-5" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(hours)}
+                            className="text-red-600 hover:text-red-900"
+                          >
+                            <Trash2 className="h-5 w-5" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -197,14 +246,31 @@ export function TimeTracking() {
         </div>
       </div>
 
-      <TimeEditModal
+      <TimeEntryModal
         isOpen={showEditModal}
         onClose={() => {
           setShowEditModal(false);
           setSelectedEntry(null);
+          setSelectedEmployee(null);
           setError(null);
         }}
-        timeEntry={selectedEntry}
+        title="Edit Time Entry"
+        employee={selectedEmployee}
+        initialData={selectedEntry || undefined}
+        onSave={handleSaveTimeEntry}
+      />
+
+      <TimeEntryModal
+        isOpen={showAddModal}
+        onClose={() => {
+          setShowAddModal(false);
+          setSelectedEmployee(null);
+          setError(null);
+        }}
+        title="Add Time Entry"
+        employee={selectedEmployee}
+        employees={employees}
+        onEmployeeSelect={setSelectedEmployee}
         onSave={handleSaveTimeEntry}
       />
     </div>
