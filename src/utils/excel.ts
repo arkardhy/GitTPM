@@ -1,4 +1,3 @@
-import { utils, writeFile } from 'xlsx';
 import type { Employee, LeaveRequest, WorkingHours } from '../types';
 import { formatDate, formatDateTime, formatDayMonthYear } from './dateTime';
 import { formatDuration } from './time';
@@ -73,29 +72,29 @@ export function exportToExcel(data: any[], type: 'employees' | 'leave-requests' 
     return;
   }
 
-  // Create workbook and worksheet
-  const worksheet = utils.json_to_sheet(formattedData);
-  const workbook = utils.book_new();
-  utils.book_append_sheet(workbook, worksheet, 'Data');
+  // Convert data to CSV format
+  const headers = Object.keys(formattedData[0]);
+  const csvContent = [
+    headers.join(','),
+    ...formattedData.map(row => 
+      headers.map(header => {
+        const value = row[header];
+        // Escape special characters and wrap in quotes if needed
+        const stringValue = String(value);
+        if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
+          return `"${stringValue.replace(/"/g, '""')}"`;
+        }
+        return stringValue;
+      }).join(',')
+    )
+  ].join('\n');
 
-  // Auto-size columns
-  const maxWidth = 50;
-  const colWidths: { [key: string]: number } = {};
-  
-  // Get column widths
-  formattedData.forEach(row => {
-    Object.entries(row).forEach(([key, value]) => {
-      const valueLength = String(value).length;
-      colWidths[key] = Math.min(
-        maxWidth,
-        Math.max(colWidths[key] || 0, key.length, valueLength)
-      );
-    });
-  });
-
-  // Apply column widths
-  worksheet['!cols'] = Object.values(colWidths).map(width => ({ width }));
-
-  // Save file
-  writeFile(workbook, `${filename}.xlsx`);
+  // Create and download the CSV file
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `${filename}.csv`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 }

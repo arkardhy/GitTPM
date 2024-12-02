@@ -41,3 +41,22 @@ export interface ResignationRequest {
   status: 'pending' | 'approved' | 'rejected';
   createdAt: string;
 }
+
+export interface FoodItem {
+  id: string;
+  name: string;
+  type: 'food' | 'drink';
+  quantity: number;
+  createdAt: string;
+}
+
+export interface FoodTransaction {
+  id: string;
+  foodItemId: string;
+  employeeId: string;
+  supervisor: string;
+  description: string | null;
+  quantity: number;
+  transactionType: 'deposit' | 'withdraw';
+  createdAt: string;
+}
