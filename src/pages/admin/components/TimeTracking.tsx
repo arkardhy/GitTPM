@@ -1,14 +1,15 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Calendar, Clock, Edit2, Trash2, Plus } from 'lucide-react';
+import { Calendar, Clock, Edit2, Trash2, Plus, Upload } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
 import { employeeService } from '../../../services/employeeService';
 import { workingHoursService } from '../../../services/workingHoursService';
 import { exportToCSV } from '../../../utils/csv';
 import { formatDuration } from '../../../utils/time';
-import { formatDate, formatTime } from '../../../utils/dateTime';
+import { formatDate, formatTime, parseDate, parseTime } from '../../../utils/dateTime';
 import { TimeEntryModal } from '../../../components/ui/TimeEntryModal';
 import { SearchBar } from '../../../components/ui/SearchBar';
 import { Button } from '../../../components/ui/Button';
+import { read, utils } from 'xlsx';
 import type { Employee, WorkingHours } from '../../../types';
 
 export function TimeTracking() {
@@ -21,6 +22,7 @@ export function TimeTracking() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [importing, setImporting] = useState(false);
 
   useEffect(() => {
     loadEmployees();
@@ -130,6 +132,62 @@ export function TimeTracking() {
     }
   };
 
+  const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setImporting(true);
+      setError(null);
+
+      const data = await file.arrayBuffer();
+      const workbook = read(data);
+      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+      const jsonData = utils.sheet_to_json(worksheet);
+
+      for (const row of jsonData) {
+        const {
+          Name,
+          Position,
+          Date,
+          'Check In': checkIn,
+          'Check Out': checkOut,
+          'Total Hours': totalHours,
+        } = row as any;
+
+        // Find employee by name and position
+        const employee = employees.find(
+          emp => emp.name === Name && emp.position === Position
+        );
+
+        if (!employee) {
+          console.warn(`Employee not found: ${Name} (${Position})`);
+          continue;
+        }
+
+        try {
+          await workingHoursService.create(employee.id, {
+            date: parseDate(Date),
+            checkIn: new Date(checkIn).toISOString(),
+            checkOut: checkOut ? new Date(checkOut).toISOString() : null,
+            totalHours: parseFloat(totalHours) || 0,
+          });
+        } catch (err) {
+          console.error(`Failed to import entry for ${Name}:`, err);
+        }
+      }
+
+      await loadEmployees();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to import data');
+      console.error('Import error:', err);
+    } finally {
+      setImporting(false);
+      // Reset the file input
+      event.target.value = '';
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -156,6 +214,27 @@ export function TimeTracking() {
                 onChange={(e) => setSelectedMonth(e.target.value)}
                 className="rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
               />
+              <div className="relative">
+                <input
+                  type="file"
+                  accept=".xlsx,.xls"
+                  onChange={handleImport}
+                  className="hidden"
+                  id="import-file"
+                  disabled={importing}
+                />
+                <label
+                  htmlFor="import-file"
+                  className={`inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md ${
+                    importing
+                      ? 'bg-gray-100 cursor-not-allowed'
+                      : 'bg-white hover:bg-gray-50 cursor-pointer'
+                  } text-gray-700`}
+                >
+                  <Upload className="h-5 w-5 mr-2" />
+                  {importing ? 'Importing...' : 'Import'}
+                </label>
+              </div>
               <Button
                 onClick={() => {
                   setSelectedEntry(null);
