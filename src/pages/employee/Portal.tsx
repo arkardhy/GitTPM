@@ -10,6 +10,7 @@ import { Modal } from '../../components/ui/Modal';
 import { EmployeeSelect } from './components/EmployeeSelect';
 import { ActivityLog } from './components/ActivityLog';
 import { EmployeeStats } from './components/EmployeeStats';
+import { ResignationForm } from './components/ResignationForm';
 import type { Employee } from '../../types';
 
 export function EmployeePortal() {
@@ -155,7 +156,7 @@ export function EmployeePortal() {
 
                 <EmployeeStats employee={selectedEmployee} />
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 sm:gap-4">
                   <Button
                     onClick={() => startDuty(selectedEmployee)}
                     disabled={isOnDuty || isDutyProcessing}
@@ -199,6 +200,10 @@ export function EmployeePortal() {
                     <Calendar className="h-5 w-5 sm:h-6 sm:w-6 mr-2" />
                     <span className="text-sm sm:text-base">Request Leave</span>
                   </Button>
+                  <ResignationForm 
+                    employee={selectedEmployee}
+                    onSuccess={loadEmployees}
+                  />
                 </div>
 
                 <ActivityLog workingHours={selectedEmployee.workingHours} />

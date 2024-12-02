@@ -1,9 +1,10 @@
 import { format } from 'date-fns';
 
 const DISCORD_WEBHOOK_URL = import.meta.env.VITE_DISCORD_WEBHOOK_URL;
+const DISCORD_RESIGNATION_WEBHOOK_URL = import.meta.env.VITE_DISCORD_RESIGNATION_WEBHOOK_URL;
 
-if (!DISCORD_WEBHOOK_URL) {
-  console.error('Discord webhook URL is not configured');
+if (!DISCORD_WEBHOOK_URL || !DISCORD_RESIGNATION_WEBHOOK_URL) {
+  console.warn('One or more Discord webhook URLs are not configured. Notifications will be disabled.');
 }
 
 const COLORS = {
@@ -41,6 +42,10 @@ interface LeaveNotification extends BaseNotification {
 interface ResignationNotification extends BaseNotification {
   status: 'pending' | 'approved' | 'rejected';
   requestDate: string;
+  passport: string;
+  reasonIC: string;
+  reasonOOC: string;
+  submissionDate: string;
 }
 
 function formatDuration(hours: number): string {
@@ -50,26 +55,35 @@ function formatDuration(hours: number): string {
   return `${h} hours ${m} minutes`;
 }
 
-async function sendDiscordEmbed(embed: any) {
-  if (!DISCORD_WEBHOOK_URL) {
-    console.error('Cannot send Discord notification: webhook URL is not configured');
+async function sendDiscordEmbed(embed: any, webhookUrl: string = DISCORD_WEBHOOK_URL): Promise<void> {
+  if (!webhookUrl) {
+    console.warn('Discord notification skipped: webhook URL not configured');
     return;
   }
 
+  const payload = { embeds: [embed] };
+
   try {
-    const response = await fetch(DISCORD_WEBHOOK_URL, {
+    const response = await fetch(webhookUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ embeds: [embed] }),
+      body: JSON.stringify(payload),
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to send Discord notification: ${response.statusText}`);
+      const errorText = await response.text();
+      throw new Error(`Discord API error (${response.status}): ${errorText}`);
     }
   } catch (error) {
-    console.error('Error sending Discord notification:', error);
+    if (error instanceof Error) {
+      console.error('Failed to send Discord notification:', {
+        error: error.message,
+        webhook: webhookUrl.split('/').slice(0, -1).join('/') + '/[REDACTED]',
+        payload: JSON.stringify(payload, null, 2),
+      });
+    }
     throw error;
   }
 }
@@ -214,7 +228,7 @@ function createLeaveRequestEmbed({
       },
       {
         name: 'Reason',
-        value: reason,
+        value: reason || 'Not provided',
       },
     ],
     timestamp: new Date().toISOString(),
@@ -226,6 +240,10 @@ function createResignationRequestEmbed({
   employeePosition,
   status,
   requestDate,
+  passport,
+  reasonIC,
+  reasonOOC,
+  submissionDate,
 }: ResignationNotification) {
   const statusEmoji = {
     pending: '⏳',
@@ -259,14 +277,42 @@ function createResignationRequestEmbed({
         inline: true,
       },
       {
-        name: 'Request Date',
-        value: format(new Date(requestDate), 'dd MMMM yyyy'),
+        name: 'Passport Number',
+        value: passport,
         inline: true,
       },
       {
         name: 'Status',
         value: status.toUpperCase(),
         inline: true,
+      },
+      {
+        name: '\u200B',
+        value: '\u200B',
+        inline: true,
+      },
+      {
+        name: 'Request Date',
+        value: format(new Date(requestDate), 'dd MMMM yyyy'),
+        inline: true,
+      },
+      {
+        name: 'Submission Date',
+        value: format(new Date(submissionDate), 'dd MMMM yyyy HH:mm:ss'),
+        inline: true,
+      },
+      {
+        name: '\u200B',
+        value: '\u200B',
+        inline: true,
+      },
+      {
+        name: 'Reason (In Character)',
+        value: reasonIC || 'Not provided',
+      },
+      {
+        name: 'Reason (Out of Character)',
+        value: reasonOOC || 'Not provided',
       },
     ],
     timestamp: new Date().toISOString(),
@@ -275,22 +321,32 @@ function createResignationRequestEmbed({
 
 export const discordNotifications = {
   async checkIn(name: string, position: string, date: Date) {
-    const embed = createCheckInEmbed({
-      employeeName: name,
-      employeePosition: position,
-      date,
-    });
-    await sendDiscordEmbed(embed);
+    try {
+      const embed = createCheckInEmbed({
+        employeeName: name,
+        employeePosition: position,
+        date,
+      });
+      await sendDiscordEmbed(embed);
+    } catch (error) {
+      console.error('Failed to send check-in notification:', error);
+      throw error;
+    }
   },
 
   async checkOut(name: string, position: string, date: Date, totalHours: number) {
-    const embed = createCheckOutEmbed({
-      employeeName: name,
-      employeePosition: position,
-      date,
-      totalHours,
-    });
-    await sendDiscordEmbed(embed);
+    try {
+      const embed = createCheckOutEmbed({
+        employeeName: name,
+        employeePosition: position,
+        date,
+        totalHours,
+      });
+      await sendDiscordEmbed(embed);
+    } catch (error) {
+      console.error('Failed to send check-out notification:', error);
+      throw error;
+    }
   },
 
   async leaveRequest(
@@ -301,15 +357,20 @@ export const discordNotifications = {
     startDate?: string,
     endDate?: string,
   ) {
-    const embed = createLeaveRequestEmbed({
-      employeeName: name,
-      employeePosition: position,
-      reason,
-      status,
-      startDate,
-      endDate,
-    });
-    await sendDiscordEmbed(embed);
+    try {
+      const embed = createLeaveRequestEmbed({
+        employeeName: name,
+        employeePosition: position,
+        reason,
+        status,
+        startDate,
+        endDate,
+      });
+      await sendDiscordEmbed(embed);
+    } catch (error) {
+      console.error('Failed to send leave request notification:', error);
+      throw error;
+    }
   },
 
   async resignationRequest(
@@ -317,13 +378,25 @@ export const discordNotifications = {
     position: string,
     status: 'pending' | 'approved' | 'rejected',
     requestDate: string,
+    passport: string,
+    reasonIC: string,
+    reasonOOC: string,
   ) {
-    const embed = createResignationRequestEmbed({
-      employeeName: name,
-      employeePosition: position,
-      status,
-      requestDate,
-    });
-    await sendDiscordEmbed(embed);
+    try {
+      const embed = createResignationRequestEmbed({
+        employeeName: name,
+        employeePosition: position,
+        status,
+        requestDate,
+        passport,
+        reasonIC,
+        reasonOOC,
+        submissionDate: new Date().toISOString(),
+      });
+      await sendDiscordEmbed(embed, DISCORD_RESIGNATION_WEBHOOK_URL);
+    } catch (error) {
+      console.error('Failed to send resignation request notification:', error);
+      throw error;
+    }
   },
 };
