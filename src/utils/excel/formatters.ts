@@ -47,11 +47,12 @@ export const timeTrackingFormatter: ExcelFormatter<{
   format: (record) => ({
     'Employee Name': record.employeeName,
     'Position': record.position,
-    'Date': format(new Date(record.hours.date), 'yyyy-MM-dd'),
-    'Check In': format(new Date(record.hours.checkIn), 'yyyy-MM-dd HH:mm:ss'),
+    'Date': format(new Date(record.hours.date), 'dd MMMM yyyy'),
+    'Check In': format(new Date(record.hours.checkIn), 'HH:mm:ss'),
     'Check Out': record.hours.checkOut 
-      ? format(new Date(record.hours.checkOut), 'yyyy-MM-dd HH:mm:ss')
-      : '',
+      ? format(new Date(record.hours.checkOut), 'HH:mm:ss')
+      : 'Active',
+    'Duration': formatDuration(record.hours.totalHours),
   }),
 };
 

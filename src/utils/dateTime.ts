@@ -1,4 +1,4 @@
-import { format } from 'date-fns';
+import { format, parse } from 'date-fns';
 
 export function formatDate(date: string | Date): string {
   return format(new Date(date), 'dd/MM/yy');
@@ -41,11 +41,4 @@ export function parseTime(date: string, timeStr: string): Date {
   // Combine date and time strings
   const dateTime = new Date(`${date}T${timeStr}`);
   return dateTime;
-}
-
-export function formatDuration(hours: number): string {
-  const totalMinutes = Math.floor(hours * 60);
-  const h = Math.floor(totalMinutes / 60);
-  const m = totalMinutes % 60;
-  return `${h}h ${m}m`;
 }

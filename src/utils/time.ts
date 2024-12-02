@@ -1,3 +1,7 @@
-// This file is now deprecated, all time-related functions have been moved to dateTime.ts
-// Keeping this file temporarily for backward compatibility
-export { formatDuration } from './dateTime';
+export function formatDuration(hours: number): string {
+  const totalMinutes = Math.floor(hours * 60);
+  const h = Math.floor(totalMinutes / 60);
+  const m = totalMinutes % 60;
+  
+  return `${h}h ${m}m`;
+}
