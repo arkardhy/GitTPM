@@ -49,11 +49,15 @@ export function ResignationRequests() {
           employee.name,
           employee.position,
           'approved',
-          request.requestDate
+          request.requestDate,
+          request.passport,
+          request.reasonIC,
+          request.reasonOOC
         );
       }
+      setError(null);
     } catch (err) {
-      setError('Failed to approve request');
+      setError(err instanceof Error ? err.message : 'Failed to approve request');
       console.error(err);
     }
   };
@@ -71,11 +75,15 @@ export function ResignationRequests() {
           employee.name,
           employee.position,
           'rejected',
-          request.requestDate
+          request.requestDate,
+          request.passport,
+          request.reasonIC,
+          request.reasonOOC
         );
       }
+      setError(null);
     } catch (err) {
-      setError('Failed to reject request');
+      setError(err instanceof Error ? err.message : 'Failed to reject request');
       console.error(err);
     }
   };
@@ -88,8 +96,9 @@ export function ResignationRequests() {
     try {
       await resignationService.delete(request.id);
       setRequests(requests.filter(req => req.id !== request.id));
+      setError(null);
     } catch (err) {
-      setError('Failed to delete request');
+      setError(err instanceof Error ? err.message : 'Failed to delete request');
       console.error(err);
     }
   };

@@ -2,8 +2,9 @@ import { format } from 'date-fns';
 
 const DISCORD_WEBHOOK_URL = import.meta.env.VITE_DISCORD_WEBHOOK_URL;
 const DISCORD_RESIGNATION_WEBHOOK_URL = import.meta.env.VITE_DISCORD_RESIGNATION_WEBHOOK_URL;
+const DISCORD_LEAVE_WEBHOOK_URL = import.meta.env.VITE_DISCORD_LEAVE_WEBHOOK_URL;
 
-if (!DISCORD_WEBHOOK_URL || !DISCORD_RESIGNATION_WEBHOOK_URL) {
+if (!DISCORD_WEBHOOK_URL || !DISCORD_RESIGNATION_WEBHOOK_URL || !DISCORD_LEAVE_WEBHOOK_URL) {
   console.warn('One or more Discord webhook URLs are not configured. Notifications will be disabled.');
 }
 
@@ -366,7 +367,7 @@ export const discordNotifications = {
         startDate,
         endDate,
       });
-      await sendDiscordEmbed(embed);
+      await sendDiscordEmbed(embed, DISCORD_LEAVE_WEBHOOK_URL);
     } catch (error) {
       console.error('Failed to send leave request notification:', error);
       throw error;
