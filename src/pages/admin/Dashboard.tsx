@@ -88,7 +88,6 @@ export function AdminDashboard() {
       </Header>
 
       <div className="flex">
-        {/* Sidebar */}
         <div
           className={`${
             sidebarOpen ? 'translate-x-0' : '-translate-x-full'
@@ -121,7 +120,6 @@ export function AdminDashboard() {
           </nav>
         </div>
 
-        {/* Main content */}
         <main
           className={`flex-1 transition-all duration-300 ease-in-out ${
             sidebarOpen ? 'ml-64' : 'ml-0'

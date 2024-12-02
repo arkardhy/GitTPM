@@ -20,6 +20,7 @@ export async function checkIn(employeeId: string, date: string, checkIn: string)
       employee_id: employeeId,
       date,
       check_in: checkIn,
+      total_hours: 0,
     })
     .select()
     .single();
@@ -67,7 +68,7 @@ export async function updateTimeEntry(id: string, updates: Partial<WorkingHours>
       date: updates.date,
       check_in: updates.checkIn,
       check_out: updates.checkOut,
-      total_hours: updates.totalHours,
+      total_hours: updates.totalHours || 0,
     })
     .eq('id', id)
     .select()

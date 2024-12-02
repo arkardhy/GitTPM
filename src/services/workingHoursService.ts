@@ -15,6 +15,15 @@ export const workingHoursService = {
       checkIn: data.checkIn,
       checkOut: data.checkOut,
     });
+
+    // Calculate total hours if both check-in and check-out are provided
+    let totalHours = 0;
+    if (data.checkIn && data.checkOut) {
+      const checkInTime = new Date(data.checkIn).getTime();
+      const checkOutTime = new Date(data.checkOut).getTime();
+      totalHours = (checkOutTime - checkInTime) / (1000 * 60 * 60);
+    }
+
     return apiCheckIn(employeeId, data.date!, data.checkIn!);
   },
 
@@ -31,6 +40,14 @@ export const workingHoursService = {
 
   async updateTimeEntry(id: string, updates: Partial<WorkingHours>): Promise<WorkingHours> {
     if (!id) throw new Error('Working hours ID is required');
+
+    // Calculate total hours if both check-in and check-out are provided
+    if (updates.checkIn && updates.checkOut) {
+      const checkInTime = new Date(updates.checkIn).getTime();
+      const checkOutTime = new Date(updates.checkOut).getTime();
+      updates.totalHours = (checkOutTime - checkInTime) / (1000 * 60 * 60);
+    }
+
     return apiUpdateTimeEntry(id, updates);
   },
 
