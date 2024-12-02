@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Modal } from './Modal';
 import { Button } from './Button';
 import type { Employee, WorkingHours } from '../../types';
+import { formatDateForInput, formatTimeForInput, parseDate, parseTime } from '../../utils/dateTime';
 
 interface TimeEntryModalProps {
   isOpen: boolean;
@@ -25,8 +26,8 @@ export function TimeEntryModal({
   initialData 
 }: TimeEntryModalProps) {
   const [date, setDate] = useState(initialData?.date || new Date().toISOString().slice(0, 10));
-  const [checkIn, setCheckIn] = useState(initialData?.checkIn?.slice(11, 16) || '');
-  const [checkOut, setCheckOut] = useState(initialData?.checkOut?.slice(11, 16) || '');
+  const [checkIn, setCheckIn] = useState(initialData?.checkIn ? formatTimeForInput(initialData.checkIn) : '');
+  const [checkOut, setCheckOut] = useState(initialData?.checkOut ? formatTimeForInput(initialData.checkOut) : '');
   const [error, setError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -41,26 +42,27 @@ export function TimeEntryModal({
       return;
     }
 
-    const checkInDate = new Date(`${date}T${checkIn}`);
-    const checkOutDate = checkOut ? new Date(`${date}T${checkOut}`) : null;
-
-    if (checkOutDate && checkInDate >= checkOutDate) {
-      setError('Check-out time must be after check-in time');
-      return;
-    }
-
     try {
       setIsProcessing(true);
       setError(null);
 
-      const totalHours = checkOutDate 
-        ? (checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60)
+      const parsedDate = parseDate(date);
+      const checkInDateTime = parseTime(parsedDate, checkIn);
+      const checkOutDateTime = checkOut ? parseTime(parsedDate, checkOut) : null;
+
+      if (checkOutDateTime && checkInDateTime >= checkOutDateTime) {
+        setError('Check-out time must be after check-in time');
+        return;
+      }
+
+      const totalHours = checkOutDateTime 
+        ? (checkOutDateTime.getTime() - checkInDateTime.getTime()) / (1000 * 60 * 60)
         : 0;
 
       await onSave({
-        date,
-        checkIn: checkInDate.toISOString(),
-        checkOut: checkOutDate?.toISOString() || null,
+        date: parsedDate,
+        checkIn: checkInDateTime.toISOString(),
+        checkOut: checkOutDateTime?.toISOString() || null,
         totalHours,
       });
 
@@ -137,6 +139,7 @@ export function TimeEntryModal({
             value={checkIn}
             onChange={(e) => setCheckIn(e.target.value)}
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            step="1"
           />
         </div>
 
@@ -147,6 +150,7 @@ export function TimeEntryModal({
             value={checkOut}
             onChange={(e) => setCheckOut(e.target.value)}
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            step="1"
           />
         </div>
       </div>
