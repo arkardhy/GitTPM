@@ -1,6 +1,7 @@
 import { Calendar, Clock } from 'lucide-react';
 import type { WorkingHours } from '../../../types';
 import { formatDuration } from '../../../utils/time';
+import { formatDateTime, formatDayMonthYear } from '../../../utils/dateTime';
 
 interface ActivityLogProps {
   workingHours: WorkingHours[];
@@ -20,21 +21,14 @@ export function ActivityLog({ workingHours }: ActivityLogProps) {
               <div className="flex items-center space-x-2 sm:space-x-3">
                 <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-indigo-600 flex-shrink-0" />
                 <span className="text-xs sm:text-sm font-medium text-gray-900">
-                  {new Date(hours.date).toLocaleDateString(undefined, {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                  })}
+                  {formatDayMonthYear(hours.date)}
                 </span>
               </div>
               <div className="flex items-center space-x-2 text-xs sm:text-sm text-gray-500">
                 <Clock className="h-4 w-4 flex-shrink-0" />
                 <span>
-                  {new Date(hours.checkIn).toLocaleTimeString()} -{' '}
-                  {hours.checkOut
-                    ? new Date(hours.checkOut).toLocaleTimeString()
-                    : 'Active'}
+                  {formatDateTime(hours.checkIn)} -{' '}
+                  {hours.checkOut ? formatDateTime(hours.checkOut) : 'Active'}
                 </span>
               </div>
             </div>

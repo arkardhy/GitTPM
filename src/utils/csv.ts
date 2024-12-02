@@ -1,5 +1,6 @@
-import { format } from 'date-fns';
 import type { Employee, LeaveRequest, WorkingHours } from '../types';
+import { formatDate, formatDateTime, formatDayMonthYear } from './dateTime';
+import { formatDuration } from './time';
 
 type ExportData = {
   [key: string]: string | number | boolean | null;
@@ -17,21 +18,6 @@ function sanitizeCSVValue(value: any): string {
   return stringValue;
 }
 
-function formatDate(date: string | Date): string {
-  return format(new Date(date), 'dd/MM/yyyy');
-}
-
-function formatDateTime(date: string | Date): string {
-  return format(new Date(date), 'dd/MM/yyyy HH:mm:ss');
-}
-
-function formatTimeHMS(hours: number): string {
-  const h = Math.floor(hours);
-  const m = Math.floor((hours - h) * 60);
-  const s = Math.floor(((hours - h) * 60 - m) * 60);
-  return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-}
-
 function calculateMonthlyHours(workingHours: WorkingHours[], monthYear?: string): number {
   const targetMonth = monthYear || new Date().toISOString().slice(0, 7);
   return workingHours
@@ -45,7 +31,7 @@ export const exportToCSV = (data: any[], type: 'employees' | 'leave-requests' | 
 
   switch (type) {
     case 'employees':
-      filename = `employees_${format(new Date(), 'yyyy-MM-dd')}`;
+      filename = `employees_${formatDate(new Date())}`;
       formattedData = data.map((employee: Employee) => {
         const currentMonthHours = calculateMonthlyHours(employee.workingHours);
         const previousMonth = new Date();
@@ -58,10 +44,10 @@ export const exportToCSV = (data: any[], type: 'employees' | 'leave-requests' | 
         return {
           Name: employee.name,
           Position: employee.position,
-          'Join Date': formatDate(employee.joinDate),
-          'Current Month Hours': formatTimeHMS(currentMonthHours),
-          'Previous Month Hours': formatTimeHMS(previousMonthHours),
-          'Total Hours': formatTimeHMS(
+          'Join Date': formatDayMonthYear(employee.joinDate),
+          'Current Month Hours': formatDuration(currentMonthHours),
+          'Previous Month Hours': formatDuration(previousMonthHours),
+          'Total Hours': formatDuration(
             employee.workingHours.reduce((sum, wh) => sum + wh.totalHours, 0)
           ),
         };
@@ -69,7 +55,7 @@ export const exportToCSV = (data: any[], type: 'employees' | 'leave-requests' | 
       break;
 
     case 'leave-requests':
-      filename = `leave_requests_${format(new Date(), 'yyyy-MM-dd')}`;
+      filename = `leave_requests_${formatDate(new Date())}`;
       formattedData = data.map((request: LeaveRequest) => ({
         'Employee ID': request.employeeId,
         'Start Date': formatDate(request.startDate),
@@ -81,14 +67,14 @@ export const exportToCSV = (data: any[], type: 'employees' | 'leave-requests' | 
       break;
 
     case 'time-tracking':
-      filename = `time_tracking_${format(new Date(), 'yyyy-MM-dd')}`;
+      filename = `time_tracking_${formatDate(new Date())}`;
       formattedData = data.map((record: any) => ({
         'Employee Name': record.employeeName,
         'Position': record.position,
         'Date': formatDate(record.date),
         'Check In': formatDateTime(record.checkIn),
         'Check Out': record.checkOut ? formatDateTime(record.checkOut) : 'Active',
-        'Duration': formatTimeHMS(record.totalHours),
+        'Duration': formatDuration(record.totalHours),
       }));
       break;
   }

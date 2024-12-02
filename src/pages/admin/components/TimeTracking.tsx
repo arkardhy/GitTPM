@@ -5,6 +5,7 @@ import { employeeService } from '../../../services/employeeService';
 import { workingHoursService } from '../../../services/workingHoursService';
 import { exportToCSV } from '../../../utils/csv';
 import { formatDuration } from '../../../utils/time';
+import { formatDate, formatTime } from '../../../utils/dateTime';
 import { TimeEntryModal } from '../../../components/ui/TimeEntryModal';
 import { SearchBar } from '../../../components/ui/SearchBar';
 import { Button } from '../../../components/ui/Button';
@@ -66,9 +67,9 @@ export function TimeTracking() {
         .filter(hours => {
           const matchesName = employee.name.toLowerCase().includes(searchLower);
           const matchesPosition = employee.position.toLowerCase().includes(searchLower);
-          const matchesDate = new Date(hours.date).toLocaleDateString().toLowerCase().includes(searchLower);
-          const matchesTime = new Date(hours.checkIn).toLocaleTimeString().toLowerCase().includes(searchLower) ||
-                            (hours.checkOut && new Date(hours.checkOut).toLocaleTimeString().toLowerCase().includes(searchLower));
+          const matchesDate = formatDate(hours.date).toLowerCase().includes(searchLower);
+          const matchesTime = formatTime(hours.checkIn).toLowerCase().includes(searchLower) ||
+                            (hours.checkOut && formatTime(hours.checkOut).toLowerCase().includes(searchLower));
           
           return matchesName || matchesPosition || matchesDate || matchesTime;
         })
@@ -208,14 +209,14 @@ export function TimeTracking() {
                         {employee.position}
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {new Date(hours.date).toLocaleDateString()}
+                        {formatDate(hours.date)}
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {new Date(hours.checkIn).toLocaleTimeString()}
+                        {formatTime(hours.checkIn)}
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                         {hours.checkOut 
-                          ? new Date(hours.checkOut).toLocaleTimeString()
+                          ? formatTime(hours.checkOut)
                           : 'Active'}
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">

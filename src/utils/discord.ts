@@ -1,4 +1,4 @@
-import { format } from 'date-fns';
+import { formatDayMonthYear, formatTime, formatDateTimeWithSeconds } from './dateTime';
 
 const DISCORD_WEBHOOK_URL = import.meta.env.VITE_DISCORD_WEBHOOK_URL;
 const DISCORD_RESIGNATION_WEBHOOK_URL = import.meta.env.VITE_DISCORD_RESIGNATION_WEBHOOK_URL;
@@ -111,12 +111,12 @@ function createCheckInEmbed({ employeeName, employeePosition, date }: CheckInNot
       },
       {
         name: 'Tanggal',
-        value: format(date, 'dd MMMM yyyy'),
+        value: formatDayMonthYear(date),
         inline: true,
       },
       {
         name: 'Waktu',
-        value: format(date, 'HH:mm:ss'),
+        value: formatTime(date),
         inline: true,
       },
     ],
@@ -151,12 +151,12 @@ function createCheckOutEmbed({
       },
       {
         name: 'Tanggal',
-        value: format(date, 'dd MMMM yyyy'),
+        value: formatDayMonthYear(date),
         inline: true,
       },
       {
         name: 'Waktu',
-        value: format(date, 'HH:mm:ss'),
+        value: formatTime(date),
         inline: true,
       },
       {
@@ -190,7 +190,7 @@ function createLeaveRequestEmbed({
   }[status];
 
   const dateDisplay = startDate && endDate
-    ? `${format(new Date(startDate), 'dd MMMM yyyy')} - ${format(new Date(endDate), 'dd MMMM yyyy')}`
+    ? `${formatDayMonthYear(startDate)} - ${formatDayMonthYear(endDate)}`
     : 'Not specified';
 
   return {
@@ -294,12 +294,12 @@ function createResignationRequestEmbed({
       },
       {
         name: 'Tanggal Pengajuan',
-        value: format(new Date(requestDate), 'dd MMMM yyyy'),
+        value: formatDayMonthYear(requestDate),
         inline: true,
       },
       {
         name: 'Tanggal Permintaan',
-        value: format(new Date(submissionDate), 'dd MMMM yyyy HH:mm:ss'),
+        value: formatDateTimeWithSeconds(submissionDate),
         inline: true,
       },
       {
