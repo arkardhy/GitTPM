@@ -37,28 +37,35 @@ export function WageCalculation({ employees }: WageCalculationProps) {
           .filter(hours => hours.date.startsWith(selectedMonth))
           .reduce((total, hours) => total + hours.totalHours, 0);
 
-        const wage = calculateWage(employee.position, monthlyHours);
+        const wageBreakdown = calculateWage(employee.position, monthlyHours);
 
         return {
           employee,
           monthlyHours,
-          wage,
+          wageBreakdown,
           isFixedSalary: FIXED_SALARY_POSITIONS.includes(employee.position),
         };
       })
-      .sort((a, b) => b.wage - a.wage);
+      .sort((a, b) => b.wageBreakdown.totalWage - a.wageBreakdown.totalWage);
   }, [employees, selectedMonth, searchQuery]);
 
   const handleExportCSV = () => {
-    const exportData = wageData.map(({ employee, monthlyHours, wage, isFixedSalary }) => ({
+    const exportData = wageData.map(({ employee, monthlyHours, wageBreakdown, isFixedSalary }) => ({
       'Employee Name': employee.name,
       'Position': employee.position,
       'Total Hours': isFixedSalary ? 'Fixed Salary' : monthlyHours.toFixed(2),
-      'Wage': formatCurrency(wage),
+      'Base Wage': formatCurrency(wageBreakdown.baseWage),
+      ...(isFixedSalary ? {} : {
+        'Performance Bonus': formatCurrency(wageBreakdown.performanceBonus),
+        'Fixed Bonus': formatCurrency(wageBreakdown.fixedBonus),
+      }),
+      'Total': formatCurrency(wageBreakdown.totalWage),
     }));
 
     exportToCSV(exportData, 'wage-calculation');
   };
+
+  const hasHourlyEmployees = wageData.some(({ isFixedSalary }) => !isFixedSalary);
 
   return (
     <div className="bg-white shadow rounded-lg">
@@ -98,11 +105,18 @@ export function WageCalculation({ employees }: WageCalculationProps) {
                     <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Employee</th>
                     <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Position</th>
                     <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Total Hours</th>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Wage</th>
+                    {hasHourlyEmployees && (
+                      <>
+                        <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Base Wage</th>
+                        <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Performance Bonus</th>
+                        <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Fixed Bonus</th>
+                      </>
+                    )}
+                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Total</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {wageData.map(({ employee, monthlyHours, wage, isFixedSalary }) => (
+                  {wageData.map(({ employee, monthlyHours, wageBreakdown, isFixedSalary }) => (
                     <tr key={employee.id}>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
                         {employee.name}
@@ -117,8 +131,26 @@ export function WageCalculation({ employees }: WageCalculationProps) {
                           monthlyHours.toFixed(2)
                         )}
                       </td>
+                      {hasHourlyEmployees && !isFixedSalary && (
+                        <>
+                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
+                            {formatCurrency(wageBreakdown.baseWage)}
+                          </td>
+                          <td className="whitespace-nowrap px-3 py-4 text-sm text-green-600">
+                            {formatCurrency(wageBreakdown.performanceBonus)}
+                          </td>
+                          <td className="whitespace-nowrap px-3 py-4 text-sm text-blue-600">
+                            {formatCurrency(wageBreakdown.fixedBonus)}
+                          </td>
+                        </>
+                      )}
+                      {hasHourlyEmployees && isFixedSalary && (
+                        <td colSpan={3} className="whitespace-nowrap px-3 py-4 text-sm text-gray-400 italic">
+                          Fixed Monthly Salary
+                        </td>
+                      )}
                       <td className="whitespace-nowrap px-3 py-4 text-sm font-medium text-indigo-600">
-                        {formatCurrency(wage)}
+                        {formatCurrency(wageBreakdown.totalWage)}
                       </td>
                     </tr>
                   ))}

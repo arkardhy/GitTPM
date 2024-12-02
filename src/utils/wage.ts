@@ -21,30 +21,46 @@ const BONUS_CONFIG = {
   STAFF_AHLI_FIXED_BONUS: 500000,
 } as const;
 
-function calculateHourlyWage(position: string, hours: number): number {
+export interface WageBreakdown {
+  baseWage: number;
+  performanceBonus: number;
+  fixedBonus: number;
+  totalWage: number;
+}
+
+function calculateHourlyWage(position: string, hours: number): WageBreakdown {
   const rate = HOURLY_RATES[position as keyof typeof HOURLY_RATES] || HOURLY_RATES.default;
   const baseWage = rate * hours;
   
   // Calculate overtime bonus for eligible positions
-  let bonus = 0;
+  let performanceBonus = 0;
   if (hours > BONUS_CONFIG.OVERTIME_THRESHOLD) {
     if (['Karyawan', 'Training', 'Staff Ahli'].includes(position)) {
-      bonus += BONUS_CONFIG.OVERTIME_BONUS;
+      performanceBonus = BONUS_CONFIG.OVERTIME_BONUS;
     }
   }
 
   // Add fixed bonus for Staff Ahli
-  if (position === 'Staff Ahli') {
-    bonus += BONUS_CONFIG.STAFF_AHLI_FIXED_BONUS;
-  }
+  const fixedBonus = position === 'Staff Ahli' ? BONUS_CONFIG.STAFF_AHLI_FIXED_BONUS : 0;
 
-  return baseWage + bonus;
+  return {
+    baseWage,
+    performanceBonus,
+    fixedBonus,
+    totalWage: baseWage + performanceBonus + fixedBonus
+  };
 }
 
-export function calculateWage(position: string, hours: number): number {
+export function calculateWage(position: string, hours: number): WageBreakdown {
   // Check if position has a fixed salary
   if (position in FIXED_SALARIES) {
-    return FIXED_SALARIES[position as keyof typeof FIXED_SALARIES];
+    const fixedSalary = FIXED_SALARIES[position as keyof typeof FIXED_SALARIES];
+    return {
+      baseWage: fixedSalary,
+      performanceBonus: 0,
+      fixedBonus: 0,
+      totalWage: fixedSalary
+    };
   }
   
   // Calculate wage with bonuses for hourly positions
