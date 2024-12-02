@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Users, LogOut, FileText, Calendar, Menu, X, Calculator, Coffee } from 'lucide-react';
+import { Users, LogOut, FileText, Calendar, Menu, X, Calculator } from 'lucide-react';
 import { storage } from '../../utils/storage';
 import { employeeService } from '../../services/employeeService';
 import { EmployeeList } from './components/EmployeeList';
@@ -8,12 +8,11 @@ import { LeaveRequests } from './components/LeaveRequests';
 import { TimeTracking } from './components/TimeTracking';
 import { ResignationRequests } from './components/ResignationRequests';
 import { WageCalculation } from './components/WageCalculation';
-import { FoodBank } from './components/FoodBank';
 import { Header } from '../../components/ui/Header';
 import { Button } from '../../components/ui/Button';
 import type { Employee } from '../../types';
 
-type Tab = 'employees' | 'leave-requests' | 'time-tracking' | 'resignation-requests' | 'wage-calculation' | 'food-bank';
+type Tab = 'employees' | 'leave-requests' | 'time-tracking' | 'resignation-requests' | 'wage-calculation';
 
 export function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<Tab>('employees');
@@ -64,11 +63,6 @@ export function AdminDashboard() {
       id: 'wage-calculation' as Tab,
       name: 'Pay Wage',
       icon: Calculator,
-    },
-    {
-      id: 'food-bank' as Tab,
-      name: 'Food Bank',
-      icon: Coffee,
     },
   ];
 
@@ -139,7 +133,6 @@ export function AdminDashboard() {
             {activeTab === 'time-tracking' && <TimeTracking />}
             {activeTab === 'resignation-requests' && <ResignationRequests />}
             {activeTab === 'wage-calculation' && <WageCalculation employees={employees} />}
-            {activeTab === 'food-bank' && <FoodBank />}
           </div>
         </main>
       </div>
