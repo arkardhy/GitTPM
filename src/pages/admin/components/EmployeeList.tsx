@@ -18,8 +18,6 @@ const POSITIONS = [
   'Training'
 ] as const;
 
-const ADDITIONAL_POSITIONS = ['Eksekutif', 'Karyawan'] as const;
-
 export function EmployeeList() {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
@@ -30,7 +28,6 @@ export function EmployeeList() {
   const [newEmployee, setNewEmployee] = useState({
     name: '',
     position: POSITIONS[0],
-    additionalPositions: [] as string[],
   });
 
   useEffect(() => {
@@ -54,13 +51,12 @@ export function EmployeeList() {
       const employee = await employeeService.create({
         name: newEmployee.name,
         position: newEmployee.position,
-        additionalPositions: newEmployee.position === 'Staff Ahli' ? newEmployee.additionalPositions : [],
         joinDate: new Date().toISOString(),
       });
       
       setEmployees([...employees, employee]);
       setShowAddModal(false);
-      setNewEmployee({ name: '', position: POSITIONS[0], additionalPositions: [] });
+      setNewEmployee({ name: '', position: POSITIONS[0] });
     } catch (err) {
       setError('Failed to add employee');
       console.error(err);
@@ -145,7 +141,6 @@ export function EmployeeList() {
                   <tr>
                     <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Name</th>
                     <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Position</th>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Additional Positions</th>
                     <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Join Date</th>
                     <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Actions</th>
                   </tr>
@@ -155,20 +150,6 @@ export function EmployeeList() {
                     <tr key={employee.id}>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900">{employee.name}</td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{employee.position}</td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {employee.additionalPositions?.length ? (
-                          <div className="flex gap-1">
-                            {employee.additionalPositions.map((pos, idx) => (
-                              <span
-                                key={idx}
-                                className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
-                              >
-                                {pos}
-                              </span>
-                            ))}
-                          </div>
-                        ) : '-'}
-                      </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                         {new Date(employee.joinDate).toLocaleDateString()}
                       </td>
@@ -226,11 +207,7 @@ export function EmployeeList() {
             <label className="block text-sm font-medium text-gray-700">Position</label>
             <select
               value={newEmployee.position}
-              onChange={(e) => setNewEmployee({ 
-                ...newEmployee, 
-                position: e.target.value,
-                additionalPositions: [] // Reset additional positions when changing main position
-              })}
+              onChange={(e) => setNewEmployee({ ...newEmployee, position: e.target.value })}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
             >
               {POSITIONS.map((position) => (
@@ -240,29 +217,6 @@ export function EmployeeList() {
               ))}
             </select>
           </div>
-          {newEmployee.position === 'Staff Ahli' && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Additional Positions</label>
-              <div className="mt-2 space-y-2">
-                {ADDITIONAL_POSITIONS.map((position) => (
-                  <label key={position} className="inline-flex items-center mr-4">
-                    <input
-                      type="checkbox"
-                      checked={newEmployee.additionalPositions.includes(position)}
-                      onChange={(e) => {
-                        const positions = e.target.checked
-                          ? [...newEmployee.additionalPositions, position]
-                          : newEmployee.additionalPositions.filter(p => p !== position);
-                        setNewEmployee({ ...newEmployee, additionalPositions: positions });
-                      }}
-                      className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                    />
-                    <span className="ml-2 text-sm text-gray-700">{position}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       </Modal>
 
@@ -305,11 +259,7 @@ export function EmployeeList() {
               <label className="block text-sm font-medium text-gray-700">Position</label>
               <select
                 value={editingEmployee.position}
-                onChange={(e) => setEditingEmployee({ 
-                  ...editingEmployee, 
-                  position: e.target.value,
-                  additionalPositions: [] // Reset additional positions when changing main position
-                })}
+                onChange={(e) => setEditingEmployee({ ...editingEmployee, position: e.target.value })}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
               >
                 {POSITIONS.map((position) => (
@@ -319,29 +269,6 @@ export function EmployeeList() {
                 ))}
               </select>
             </div>
-            {editingEmployee.position === 'Staff Ahli' && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Additional Positions</label>
-                <div className="mt-2 space-y-2">
-                  {ADDITIONAL_POSITIONS.map((position) => (
-                    <label key={position} className="inline-flex items-center mr-4">
-                      <input
-                        type="checkbox"
-                        checked={editingEmployee.additionalPositions?.includes(position)}
-                        onChange={(e) => {
-                          const positions = e.target.checked
-                            ? [...(editingEmployee.additionalPositions || []), position]
-                            : (editingEmployee.additionalPositions || []).filter(p => p !== position);
-                          setEditingEmployee({ ...editingEmployee, additionalPositions: positions });
-                        }}
-                        className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                      />
-                      <span className="ml-2 text-sm text-gray-700">{position}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         )}
       </Modal>

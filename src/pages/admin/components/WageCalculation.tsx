@@ -33,21 +33,18 @@ export function WageCalculation({ employees }: WageCalculationProps) {
         return {
           employee,
           monthlyHours,
-          ...wage,
-          isFixedSalary: ['Komisaris Utama', 'Sumber Daya Manusia', 'Bendahara', 'Pemasaran', 'Sekretaris'].includes(employee.position)
+          wage,
         };
       })
-      .sort((a, b) => b.total - a.total);
+      .sort((a, b) => b.wage - a.wage);
   }, [employees, selectedMonth, searchQuery]);
 
   const handleExportCSV = () => {
-    const exportData = wageData.map(({ employee, monthlyHours, base, bonus, total, isFixedSalary }) => ({
+    const exportData = wageData.map(({ employee, monthlyHours, wage }) => ({
       'Employee Name': employee.name,
       'Position': employee.position,
-      'Total Hours': isFixedSalary ? 'Fixed Salary' : monthlyHours.toFixed(2),
-      'Base Wage': formatCurrency(base),
-      'Bonus': formatCurrency(bonus),
-      'Total Wage': formatCurrency(total),
+      'Total Hours': monthlyHours.toFixed(2),
+      'Wage': formatCurrency(wage),
     }));
 
     exportToCSV(exportData, 'wage-calculation');
@@ -91,13 +88,11 @@ export function WageCalculation({ employees }: WageCalculationProps) {
                     <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Employee</th>
                     <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Position</th>
                     <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Total Hours</th>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Base Wage</th>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Bonus</th>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Total Wage</th>
+                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Wage</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {wageData.map(({ employee, monthlyHours, base, bonus, total, isFixedSalary }) => (
+                  {wageData.map(({ employee, monthlyHours, wage }) => (
                     <tr key={employee.id}>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
                         {employee.name}
@@ -106,26 +101,10 @@ export function WageCalculation({ employees }: WageCalculationProps) {
                         {employee.position}
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {isFixedSalary ? (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                            Fixed Salary
-                          </span>
-                        ) : (
-                          monthlyHours.toFixed(2)
-                        )}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {formatCurrency(base)}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm">
-                        {bonus > 0 ? (
-                          <span className="text-green-600 font-medium">{formatCurrency(bonus)}</span>
-                        ) : (
-                          <span className="text-gray-500">-</span>
-                        )}
+                        {monthlyHours.toFixed(2)}
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm font-medium text-indigo-600">
-                        {formatCurrency(total)}
+                        {formatCurrency(wage)}
                       </td>
                     </tr>
                   ))}

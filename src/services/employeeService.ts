@@ -30,7 +30,6 @@ export const employeeService = {
       .insert({
         name: employee.name,
         position: employee.position,
-        additional_positions: employee.additionalPositions,
         join_date: employee.joinDate,
       })
       .select()
@@ -49,7 +48,6 @@ export const employeeService = {
       .update({
         name: updates.name,
         position: updates.position,
-        additional_positions: updates.additionalPositions,
         join_date: updates.joinDate,
       })
       .eq('id', id)
@@ -77,7 +75,6 @@ function transformEmployeeData(data: any): Employee {
     id: data.id,
     name: data.name,
     position: data.position,
-    additionalPositions: data.additional_positions || [],
     joinDate: data.join_date,
     warnings: [],
     workingHours: data.working_hours?.map((wh: any) => ({

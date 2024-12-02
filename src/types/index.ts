@@ -2,7 +2,6 @@ export interface Employee {
   id: string;
   name: string;
   position: string;
-  additionalPositions?: string[];
   joinDate: string;
   warnings: Warning[];
   workingHours: WorkingHours[];
