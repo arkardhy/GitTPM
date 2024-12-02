@@ -148,7 +148,7 @@ export function LeaveRequests() {
     <div className="bg-white shadow rounded-lg">
       <div className="px-4 py-5 sm:p-6">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Leave Requests</h2>
+          <h2 className="text-2xl font-bold text-gray-900">Permintaan Cuti</h2>
           <button
             onClick={handleExportCSV}
             className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
@@ -169,12 +169,12 @@ export function LeaveRequests() {
               <table className="min-w-full divide-y divide-gray-300">
                 <thead>
                   <tr>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Employee</th>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Start Date</th>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">End Date</th>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Reason</th>
+                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Nama</th>
+                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Mulai</th>
+                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Sampai</th>
+                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Alasan</th>
                     <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Status</th>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Actions</th>
+                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Rubah</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
@@ -263,10 +263,10 @@ export function LeaveRequests() {
                 setEditingRequest(null);
               }}
             >
-              Cancel
+              Batalkan
             </Button>
             <Button variant="primary" onClick={handleEditSave}>
-              Save Changes
+              Simpan Data
             </Button>
           </>
         }
@@ -274,7 +274,7 @@ export function LeaveRequests() {
         {editingRequest && (
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">Start Date</label>
+              <label className="block text-sm font-medium text-gray-700">Mulai</label>
               <input
                 type="date"
                 value={editingRequest.startDate}
@@ -283,7 +283,7 @@ export function LeaveRequests() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">End Date</label>
+              <label className="block text-sm font-medium text-gray-700">Sampai</label>
               <input
                 type="date"
                 value={editingRequest.endDate}
@@ -292,7 +292,7 @@ export function LeaveRequests() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Reason</label>
+              <label className="block text-sm font-medium text-gray-700">Alasan</label>
               <textarea
                 value={editingRequest.reason}
                 onChange={(e) => setEditingRequest({ ...editingRequest, reason: e.target.value })}
@@ -310,9 +310,9 @@ export function LeaveRequests() {
                 })}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
               >
-                <option value="pending">Pending</option>
-                <option value="approved">Approved</option>
-                <option value="rejected">Rejected</option>
+                <option value="pending">Tertunda</option>
+                <option value="approved">Disetujui</option>
+                <option value="rejected">Ditolak</option>
               </select>
             </div>
           </div>

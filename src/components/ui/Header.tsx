@@ -17,7 +17,7 @@ export function Header({ showNavigation = true, children }: HeaderProps) {
                 alt="Trans Kota Kita Logo"
                 className="h-6 sm:h-8 w-auto"
               />
-              <span className="ml-2 text-base sm:text-xl font-bold text-white">Trans Management</span>
+              <span className="ml-2 text-base sm:text-xl font-bold text-white">Trans Management System</span>
             </div>
             {children}
           </div>

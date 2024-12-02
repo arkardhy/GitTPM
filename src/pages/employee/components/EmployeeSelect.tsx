@@ -17,7 +17,7 @@ export function EmployeeSelect({
   return (
     <div className="mb-8">
       <label className="block text-sm font-medium text-gray-700 mb-2">
-        Select Employee
+        Nama Anggota Trans
       </label>
       <div className="relative">
         <select
@@ -29,7 +29,7 @@ export function EmployeeSelect({
             onClearError();
           }}
         >
-          <option value="">Select an employee</option>
+          <option value="">Pilih Nama Kamu</option>
           {employees.map((employee) => (
             <option key={employee.id} value={employee.id}>
               {employee.name}

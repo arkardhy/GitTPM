@@ -73,7 +73,7 @@ export function ResignationForm({ employee, onSuccess }: ResignationFormProps) {
         className="h-12 sm:h-14"
       >
         <FileText className="h-5 w-5 sm:h-6 sm:w-6 mr-2" />
-        <span className="text-sm sm:text-base">Request Resignation</span>
+        <span className="text-sm sm:text-base">Resign</span>
       </Button>
 
       <Modal
@@ -110,7 +110,7 @@ export function ResignationForm({ employee, onSuccess }: ResignationFormProps) {
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Passport Number</label>
+            <label className="block text-sm font-medium text-gray-700">Passport</label>
             <input
               type="text"
               value={formData.passport}
@@ -122,7 +122,7 @@ export function ResignationForm({ employee, onSuccess }: ResignationFormProps) {
 
           <div>
             <label className="block text-sm font-medium text-gray-700">
-              Reason (In Character)
+              Alasan (In Character)
             </label>
             <textarea
               value={formData.reasonIC}
@@ -135,7 +135,7 @@ export function ResignationForm({ employee, onSuccess }: ResignationFormProps) {
 
           <div>
             <label className="block text-sm font-medium text-gray-700">
-              Reason (Out of Character)
+              Alasan (Out of Character)
             </label>
             <textarea
               value={formData.reasonOOC}
@@ -147,7 +147,7 @@ export function ResignationForm({ employee, onSuccess }: ResignationFormProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Request Date</label>
+            <label className="block text-sm font-medium text-gray-700">Tanggal Pengajuan</label>
             <input
               type="date"
               value={formData.requestDate}

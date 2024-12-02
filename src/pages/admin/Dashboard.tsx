@@ -82,7 +82,7 @@ export function AdminDashboard() {
             variant="secondary"
           >
             <LogOut className="h-5 w-5 mr-2" />
-            Logout
+            Keluar
           </Button>
         </div>
       </Header>

@@ -108,14 +108,14 @@ export function EmployeeList() {
     <div className="bg-white shadow rounded-lg">
       <div className="px-4 py-5 sm:p-6">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Employees</h2>
+          <h2 className="text-2xl font-bold text-gray-900">Anggota</h2>
           <div className="space-x-4">
             <Button
               onClick={() => setShowAddModal(true)}
               className="inline-flex items-center"
             >
               <UserPlus className="h-5 w-5 mr-2" />
-              Add Employee
+              Tambah Data
             </Button>
             <Button
               onClick={handleExportCSV}
@@ -139,10 +139,10 @@ export function EmployeeList() {
               <table className="min-w-full divide-y divide-gray-300">
                 <thead>
                   <tr>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Name</th>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Position</th>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Join Date</th>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Actions</th>
+                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Nama</th>
+                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Posisi</th>
+                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Tanggal</th>
+                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Rubah</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
@@ -185,17 +185,17 @@ export function EmployeeList() {
         footer={
           <>
             <Button variant="secondary" onClick={() => setShowAddModal(false)}>
-              Cancel
+              Batalkan
             </Button>
             <Button variant="primary" onClick={handleAddEmployee}>
-              Add Employee
+              Tambah Data
             </Button>
           </>
         }
       >
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Name</label>
+            <label className="block text-sm font-medium text-gray-700">Nama</label>
             <input
               type="text"
               value={newEmployee.name}
@@ -204,7 +204,7 @@ export function EmployeeList() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Position</label>
+            <label className="block text-sm font-medium text-gray-700">Posisi</label>
             <select
               value={newEmployee.position}
               onChange={(e) => setNewEmployee({ ...newEmployee, position: e.target.value })}
@@ -236,10 +236,10 @@ export function EmployeeList() {
                 setEditingEmployee(null);
               }}
             >
-              Cancel
+              Batalkan
             </Button>
             <Button variant="primary" onClick={handleEditSave}>
-              Save Changes
+              Simpan Data
             </Button>
           </>
         }
@@ -247,7 +247,7 @@ export function EmployeeList() {
         {editingEmployee && (
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">Name</label>
+              <label className="block text-sm font-medium text-gray-700">Nama</label>
               <input
                 type="text"
                 value={editingEmployee.name}
@@ -256,7 +256,7 @@ export function EmployeeList() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Position</label>
+              <label className="block text-sm font-medium text-gray-700">Posisi</label>
               <select
                 value={editingEmployee.position}
                 onChange={(e) => setEditingEmployee({ ...editingEmployee, position: e.target.value })}

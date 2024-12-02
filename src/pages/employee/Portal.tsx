@@ -118,7 +118,7 @@ export function EmployeePortal() {
         <div className="max-w-3xl mx-auto">
           <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 md:p-8">
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 text-center mb-6">
-              Employee Portal
+              Trans Check Log
             </h1>
             
             {(dutyError || leaveError) && (
@@ -170,7 +170,7 @@ export function EmployeePortal() {
                     ) : (
                       <>
                         <Clock className="h-5 w-5 sm:h-6 sm:w-6 mr-2" />
-                        <span className="text-sm sm:text-base">Start Duty</span>
+                        <span className="text-sm sm:text-base">On Duty</span>
                       </>
                     )}
                   </Button>
@@ -187,7 +187,7 @@ export function EmployeePortal() {
                     ) : (
                       <>
                         <Clock className="h-5 w-5 sm:h-6 sm:w-6 mr-2" />
-                        <span className="text-sm sm:text-base">End Duty</span>
+                        <span className="text-sm sm:text-base">Off Duty</span>
                       </>
                     )}
                   </Button>
@@ -198,7 +198,7 @@ export function EmployeePortal() {
                     className="h-12 sm:h-14"
                   >
                     <Calendar className="h-5 w-5 sm:h-6 sm:w-6 mr-2" />
-                    <span className="text-sm sm:text-base">Request Leave</span>
+                    <span className="text-sm sm:text-base">Ajukan Cuti</span>
                   </Button>
                   <ResignationForm 
                     employee={selectedEmployee}
@@ -241,7 +241,7 @@ export function EmployeePortal() {
       >
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Start Date</label>
+            <label className="block text-sm font-medium text-gray-700">Mulai Tanggal</label>
             <input
               type="date"
               value={leaveRequest.startDate}
@@ -251,7 +251,7 @@ export function EmployeePortal() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">End Date</label>
+            <label className="block text-sm font-medium text-gray-700">Sampai</label>
             <input
               type="date"
               value={leaveRequest.endDate}
@@ -261,7 +261,7 @@ export function EmployeePortal() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Reason</label>
+            <label className="block text-sm font-medium text-gray-700">Alasan</label>
             <textarea
               value={leaveRequest.reason}
               onChange={(e) => setLeaveRequest({ ...leaveRequest, reason: e.target.value })}

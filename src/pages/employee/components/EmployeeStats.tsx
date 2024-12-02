@@ -25,7 +25,7 @@ export function EmployeeStats({ employee }: EmployeeStatsProps) {
         <div className="flex items-center">
           <Clock className="h-6 w-6 sm:h-8 sm:w-8 text-indigo-600" />
           <div className="ml-3 sm:ml-4">
-            <p className="text-xs sm:text-sm font-medium text-gray-500">Monthly Hours</p>
+            <p className="text-xs sm:text-sm font-medium text-gray-500">Total Jam</p>
             <p className="text-lg sm:text-2xl font-semibold text-gray-900">{formatDuration(monthlyHours)}</p>
           </div>
         </div>
@@ -35,7 +35,7 @@ export function EmployeeStats({ employee }: EmployeeStatsProps) {
         <div className="flex items-center">
           <Calendar className="h-6 w-6 sm:h-8 sm:w-8 text-indigo-600" />
           <div className="ml-3 sm:ml-4">
-            <p className="text-xs sm:text-sm font-medium text-gray-500">Daily Average</p>
+            <p className="text-xs sm:text-sm font-medium text-gray-500">Rata-Rata Jam Harian</p>
             <p className="text-lg sm:text-2xl font-semibold text-gray-900">{formatDuration(averageHours)}</p>
           </div>
         </div>

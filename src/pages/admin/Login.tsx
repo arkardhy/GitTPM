@@ -26,7 +26,7 @@ export function AdminLogin() {
             alt="Trans Kota Kita Logo"
             className="mx-auto h-12 w-auto"
           />
-          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">Admin Login</h2>
+          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">Trans Management System</h2>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleLogin}>
           {error && (
@@ -51,7 +51,7 @@ export function AdminLogin() {
             type="submit"
             className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
           >
-            Sign in
+            Masuk
           </button>
         </form>
       </div>

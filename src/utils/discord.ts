@@ -91,16 +91,16 @@ async function sendDiscordEmbed(embed: any, webhookUrl: string = DISCORD_WEBHOOK
 
 function createCheckInEmbed({ employeeName, employeePosition, date }: CheckInNotification) {
   return {
-    title: '🟢 Employee Started Duty',
+    title: '🟢 Mulai On Duty',
     color: COLORS.CHECK_IN,
     fields: [
       {
-        name: 'Employee',
+        name: 'Nama',
         value: employeeName,
         inline: true,
       },
       {
-        name: 'Position',
+        name: 'Posisi',
         value: employeePosition,
         inline: true,
       },
@@ -110,12 +110,12 @@ function createCheckInEmbed({ employeeName, employeePosition, date }: CheckInNot
         inline: true,
       },
       {
-        name: 'Date',
+        name: 'Tanggal',
         value: format(date, 'dd MMMM yyyy'),
         inline: true,
       },
       {
-        name: 'Time',
+        name: 'Waktu',
         value: format(date, 'HH:mm:ss'),
         inline: true,
       },
@@ -131,16 +131,16 @@ function createCheckOutEmbed({
   totalHours 
 }: CheckOutNotification) {
   return {
-    title: '🔴 Employee Ended Duty',
+    title: '🔴 Off Duty',
     color: COLORS.CHECK_OUT,
     fields: [
       {
-        name: 'Employee',
+        name: 'Nama',
         value: employeeName,
         inline: true,
       },
       {
-        name: 'Position',
+        name: 'Posisi',
         value: employeePosition,
         inline: true,
       },
@@ -150,17 +150,17 @@ function createCheckOutEmbed({
         inline: true,
       },
       {
-        name: 'Date',
+        name: 'Tanggal',
         value: format(date, 'dd MMMM yyyy'),
         inline: true,
       },
       {
-        name: 'Time',
+        name: 'Waktu',
         value: format(date, 'HH:mm:ss'),
         inline: true,
       },
       {
-        name: 'Duration',
+        name: 'Total Durasi',
         value: formatDuration(totalHours),
         inline: true,
       },
@@ -194,16 +194,16 @@ function createLeaveRequestEmbed({
     : 'Not specified';
 
   return {
-    title: `📋 Leave Request ${statusEmoji}`,
+    title: `📋 Pengajuan Cuti ${statusEmoji}`,
     color: statusColor,
     fields: [
       {
-        name: 'Employee',
+        name: 'Nama',
         value: employeeName,
         inline: true,
       },
       {
-        name: 'Position',
+        name: 'Posisi',
         value: employeePosition,
         inline: true,
       },
@@ -213,7 +213,7 @@ function createLeaveRequestEmbed({
         inline: true,
       },
       {
-        name: 'Date Range',
+        name: 'Tanggal',
         value: dateDisplay,
         inline: true,
       },
@@ -228,7 +228,7 @@ function createLeaveRequestEmbed({
         inline: true,
       },
       {
-        name: 'Reason',
+        name: 'Alasan',
         value: reason || 'Not provided',
       },
     ],
@@ -259,16 +259,16 @@ function createResignationRequestEmbed({
   }[status];
 
   return {
-    title: `📄 Resignation Request ${statusEmoji}`,
+    title: `📄 Pengajuan Pengunduran Diri ${statusEmoji}`,
     color: statusColor,
     fields: [
       {
-        name: 'Employee',
+        name: 'Nama',
         value: employeeName,
         inline: true,
       },
       {
-        name: 'Position',
+        name: 'Posisi',
         value: employeePosition,
         inline: true,
       },
@@ -278,7 +278,7 @@ function createResignationRequestEmbed({
         inline: true,
       },
       {
-        name: 'Passport Number',
+        name: 'Passport',
         value: passport,
         inline: true,
       },
@@ -293,12 +293,12 @@ function createResignationRequestEmbed({
         inline: true,
       },
       {
-        name: 'Request Date',
+        name: 'Tanggal Pengajuan',
         value: format(new Date(requestDate), 'dd MMMM yyyy'),
         inline: true,
       },
       {
-        name: 'Submission Date',
+        name: 'Tanggal Permintaan',
         value: format(new Date(submissionDate), 'dd MMMM yyyy HH:mm:ss'),
         inline: true,
       },
@@ -308,11 +308,11 @@ function createResignationRequestEmbed({
         inline: true,
       },
       {
-        name: 'Reason (In Character)',
+        name: 'Alasan (In Character)',
         value: reasonIC || 'Not provided',
       },
       {
-        name: 'Reason (Out of Character)',
+        name: 'Alasan (Out of Character)',
         value: reasonOOC || 'Not provided',
       },
     ],

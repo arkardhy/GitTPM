@@ -141,7 +141,7 @@ export function TimeTracking() {
     <div className="bg-white shadow rounded-lg">
       <div className="px-4 py-5 sm:p-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Time Tracking</h2>
+          <h2 className="text-2xl font-bold text-gray-900">Lacak Jam Kerja</h2>
           <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
             <SearchBar
               value={searchQuery}
@@ -164,7 +164,7 @@ export function TimeTracking() {
                 className="inline-flex items-center"
               >
                 <Plus className="h-5 w-5 mr-2" />
-                Add Entry
+                Tambahkan
               </Button>
               <Button
                 onClick={handleExportCSV}
@@ -189,13 +189,13 @@ export function TimeTracking() {
               <table className="min-w-full divide-y divide-gray-300">
                 <thead>
                   <tr>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Employee</th>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Position</th>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Date</th>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Check In</th>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Check Out</th>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Total Hours</th>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Actions</th>
+                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Nama</th>
+                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Posisi</th>
+                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Tanggal</th>
+                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">On Duty</th>
+                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Off Duty</th>
+                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Total Jam</th>
+                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Rubah</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">

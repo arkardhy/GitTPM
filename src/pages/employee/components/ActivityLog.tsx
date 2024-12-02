@@ -9,7 +9,7 @@ interface ActivityLogProps {
 export function ActivityLog({ workingHours }: ActivityLogProps) {
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
-      <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">Recent Activity</h2>
+      <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">Aktivitas Terakhir</h2>
       <div className="space-y-3 sm:space-y-4">
         {workingHours.slice(-5).map((hours, index) => (
           <div
@@ -40,7 +40,7 @@ export function ActivityLog({ workingHours }: ActivityLogProps) {
             </div>
             {hours.checkOut && (
               <div className="mt-2 text-xs sm:text-sm font-medium text-indigo-600">
-                Total Hours: {formatDuration(hours.totalHours)}
+                Total Jam: {formatDuration(hours.totalHours)}
               </div>
             )}
           </div>

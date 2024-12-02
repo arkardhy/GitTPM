@@ -102,14 +102,14 @@ export function WageCalculation({ employees }: WageCalculationProps) {
               <table className="min-w-full divide-y divide-gray-300">
                 <thead>
                   <tr>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Employee</th>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Position</th>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Total Hours</th>
+                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Nama</th>
+                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Posisi</th>
+                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Total Jam</th>
                     {hasHourlyEmployees && (
                       <>
-                        <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Base Wage</th>
-                        <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Performance Bonus</th>
-                        <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Fixed Bonus</th>
+                        <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Gaji</th>
+                        <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Bonus</th>
+                        <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Bonus Tetap</th>
                       </>
                     )}
                     <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Total</th>
@@ -126,7 +126,7 @@ export function WageCalculation({ employees }: WageCalculationProps) {
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                         {isFixedSalary ? (
-                          <span className="italic text-gray-400">Fixed Salary</span>
+                          <span className="italic text-gray-400">Gaji Tetap</span>
                         ) : (
                           monthlyHours.toFixed(2)
                         )}
@@ -146,7 +146,7 @@ export function WageCalculation({ employees }: WageCalculationProps) {
                       )}
                       {hasHourlyEmployees && isFixedSalary && (
                         <td colSpan={3} className="whitespace-nowrap px-3 py-4 text-sm text-gray-400 italic">
-                          Fixed Monthly Salary
+                          Gaji Tetap Tiap Bulan
                         </td>
                       )}
                       <td className="whitespace-nowrap px-3 py-4 text-sm font-medium text-indigo-600">

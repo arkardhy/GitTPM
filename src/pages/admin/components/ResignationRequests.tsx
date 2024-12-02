@@ -130,7 +130,7 @@ export function ResignationRequests() {
     <div className="bg-white shadow rounded-lg">
       <div className="px-4 py-5 sm:p-6">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Resignation Requests</h2>
+          <h2 className="text-2xl font-bold text-gray-900">Permintaan Pengunduran Diri</h2>
           <button
             onClick={handleExportCSV}
             className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
@@ -151,11 +151,11 @@ export function ResignationRequests() {
               <table className="min-w-full divide-y divide-gray-300">
                 <thead>
                   <tr>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Employee</th>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Position</th>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Request Date</th>
+                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Nama</th>
+                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Posisi</th>
+                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Pengajuan</th>
                     <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Status</th>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Actions</th>
+                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Rubah</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
@@ -245,32 +245,32 @@ export function ResignationRequests() {
               setSelectedRequest(null);
             }}
           >
-            Close
+            Tutup
           </Button>
         }
       >
         {selectedRequest && (
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">Passport Number</label>
+              <label className="block text-sm font-medium text-gray-700">Passport</label>
               <p className="mt-1 text-sm text-gray-900">{selectedRequest.passport}</p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Reason (In Character)</label>
+              <label className="block text-sm font-medium text-gray-700">Alasan (In Character)</label>
               <p className="mt-1 text-sm text-gray-900 whitespace-pre-wrap">{selectedRequest.reasonIC}</p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Reason (Out of Character)</label>
+              <label className="block text-sm font-medium text-gray-700">Alasan (Out of Character)</label>
               <p className="mt-1 text-sm text-gray-900 whitespace-pre-wrap">{selectedRequest.reasonOOC}</p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Request Date</label>
+              <label className="block text-sm font-medium text-gray-700">Tanggal Pengajuan</label>
               <p className="mt-1 text-sm text-gray-900">
                 {new Date(selectedRequest.requestDate).toLocaleDateString()}
               </p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Submission Date</label>
+              <label className="block text-sm font-medium text-gray-700">Tanggal Permintaan</label>
               <p className="mt-1 text-sm text-gray-900">
                 {new Date(selectedRequest.createdAt).toLocaleString()}
               </p>
