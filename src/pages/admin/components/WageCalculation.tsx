@@ -2,10 +2,11 @@ import { useState, useMemo, useEffect } from 'react';
 import { Calculator, Download, CheckCircle } from 'lucide-react';
 import { calculateWage, formatCurrency } from '../../../utils/wage';
 import { SearchBar } from '../../../components/ui/SearchBar';
-import { exportToCSV } from '../../../utils/csv';
+import { exportToExcel } from '../../../utils/excel';
 import { markWageAsWithdrawn, getWageWithdrawals } from '../../../lib/api/wageApi';
 import { WageConfirmationModal } from '../../../components/ui/WageConfirmationModal';
 import type { Employee } from '../../../types';
+import type { WageExportData } from '../../../utils/excel/types';
 
 interface WageCalculationProps {
   employees: Employee[];
@@ -66,7 +67,11 @@ export function WageCalculation({ employees }: WageCalculationProps) {
         const wageBreakdown = calculateWage(employee.position, monthlyHours);
 
         return {
-          employee,
+          employee: {
+            id: employee.id,
+            name: employee.name,
+            position: employee.position,
+          },
           monthlyHours,
           wageBreakdown,
           isFixedSalary: FIXED_SALARY_POSITIONS.includes(employee.position),
@@ -77,20 +82,10 @@ export function WageCalculation({ employees }: WageCalculationProps) {
   }, [employees, selectedMonth, searchQuery, withdrawnEmployees]);
 
   const handleExportCSV = () => {
-    const exportData = wageData.map(({ employee, monthlyHours, wageBreakdown, isFixedSalary, isWithdrawn }) => ({
-      'Employee Name': employee.name,
-      'Position': employee.position,
-      'Total Hours': isFixedSalary ? 'Fixed Salary' : monthlyHours.toFixed(2),
-      'Base Wage': formatCurrency(wageBreakdown.baseWage),
-      ...(isFixedSalary ? {} : {
-        'Performance Bonus': formatCurrency(wageBreakdown.performanceBonus),
-        'Fixed Bonus': formatCurrency(wageBreakdown.fixedBonus),
-      }),
-      'Total': formatCurrency(wageBreakdown.totalWage),
-      'Status': isWithdrawn ? 'Withdrawn' : 'Pending',
-    }));
-
-    exportToCSV(exportData, 'wage-calculation');
+    exportToExcel(wageData, 'wage-calculation', {
+      filename: `wage_calculation_${selectedMonth}`,
+      sheetName: 'Wage Calculation',
+    });
   };
 
   const handleWithdraw = async () => {
