@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Clock, FileText, UserCircle, Calendar } from 'lucide-react';
 import { employeeService } from '../../services/employeeService';
-import { workingHoursService } from '../../services/workingHoursService';
 import { leaveRequestService } from '../../services/leaveRequestService';
 import { discordNotifications } from '../../utils/discord';
+import { useWorkingHours } from '../../hooks/useWorkingHours';
 import { Header } from '../../components/ui/Header';
 import { Button } from '../../components/ui/Button';
 import { Modal } from '../../components/ui/Modal';
@@ -17,103 +17,56 @@ export function EmployeePortal() {
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [showLeaveModal, setShowLeaveModal] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [leaveRequest, setLeaveRequest] = useState({
     startDate: '',
     endDate: '',
     reason: '',
   });
 
+  const loadEmployees = async () => {
+    try {
+      const data = await employeeService.getAll();
+      setEmployees(data);
+      if (selectedEmployee) {
+        setSelectedEmployee(data.find(emp => emp.id === selectedEmployee.id) || null);
+      }
+      setLoading(false);
+    } catch (err) {
+      console.error('Failed to load employees:', err);
+      setLoading(false);
+    }
+  };
+
+  const { 
+    isProcessing: isDutyProcessing, 
+    error: dutyError,
+    startDuty,
+    endDuty,
+    clearError: clearDutyError,
+  } = useWorkingHours(loadEmployees);
+
+  const [isLeaveProcessing, setIsLeaveProcessing] = useState(false);
+  const [leaveError, setLeaveError] = useState<string | null>(null);
+
   useEffect(() => {
     loadEmployees();
   }, []);
 
-  async function loadEmployees() {
-    try {
-      const data = await employeeService.getAll();
-      setEmployees(data);
-      setLoading(false);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load employees');
-      console.error(err);
-      setLoading(false);
-    }
-  }
-
-  const handleCheckIn = async () => {
-    if (!selectedEmployee?.id) {
-      setError('Please select an employee first');
-      return;
-    }
-
-    try {
-      const now = new Date();
-      const date = now.toISOString().split('T')[0];
-      const checkIn = now.toISOString();
-
-      await workingHoursService.checkIn(selectedEmployee.id, date, checkIn);
-      await discordNotifications.checkIn(selectedEmployee.name, selectedEmployee.position, now);
-      
-      await loadEmployees();
-      setSelectedEmployee(employees.find(emp => emp.id === selectedEmployee.id) || null);
-      setError(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to check in');
-      console.error(err);
-    }
-  };
-
-  const handleCheckOut = async () => {
-    if (!selectedEmployee?.id) {
-      setError('Please select an employee first');
-      return;
-    }
-
-    try {
-      const now = new Date();
-      const checkOut = now.toISOString();
-      
-      const lastEntry = selectedEmployee.workingHours[selectedEmployee.workingHours.length - 1];
-      if (!lastEntry?.id) {
-        throw new Error('No active check-in found');
-      }
-
-      if (lastEntry.checkOut) {
-        throw new Error('Employee is not checked in');
-      }
-
-      const checkInTime = new Date(lastEntry.checkIn);
-      const totalHours = (now.getTime() - checkInTime.getTime()) / (1000 * 60 * 60);
-      
-      await workingHoursService.checkOut(lastEntry.id, checkOut, totalHours);
-      await discordNotifications.checkOut(
-        selectedEmployee.name,
-        selectedEmployee.position,
-        now,
-        totalHours
-      );
-      
-      await loadEmployees();
-      setSelectedEmployee(employees.find(emp => emp.id === selectedEmployee.id) || null);
-      setError(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to check out');
-      console.error(err);
-    }
-  };
-
   const handleLeaveRequest = async () => {
     if (!selectedEmployee?.id) {
-      setError('Please select an employee first');
+      setLeaveError('Please select an employee first');
       return;
     }
 
     if (!leaveRequest.startDate || !leaveRequest.endDate || !leaveRequest.reason) {
-      setError('Please fill in all leave request fields');
+      setLeaveError('Please fill in all leave request fields');
       return;
     }
 
     try {
+      setIsLeaveProcessing(true);
+      setLeaveError(null);
+
       await leaveRequestService.create({
         employeeId: selectedEmployee.id,
         startDate: leaveRequest.startDate,
@@ -132,14 +85,15 @@ export function EmployeePortal() {
 
       setShowLeaveModal(false);
       setLeaveRequest({ startDate: '', endDate: '', reason: '' });
-      setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to submit leave request');
-      console.error(err);
+      setLeaveError(err instanceof Error ? err.message : 'Failed to submit leave request');
+      console.error('Leave request error:', err);
+    } finally {
+      setIsLeaveProcessing(false);
     }
   };
 
-  const getLastCheckIn = () => {
+  const getLastDutySession = () => {
     if (!selectedEmployee?.workingHours?.length) return null;
     const lastEntry = selectedEmployee.workingHours[selectedEmployee.workingHours.length - 1];
     return lastEntry && !lastEntry.checkOut ? lastEntry : null;
@@ -153,6 +107,8 @@ export function EmployeePortal() {
     );
   }
 
+  const isOnDuty = !!getLastDutySession();
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-white">
       <Header showNavigation={false} />
@@ -164,9 +120,9 @@ export function EmployeePortal() {
               Employee Portal
             </h1>
             
-            {error && (
+            {(dutyError || leaveError) && (
               <div className="mb-6 p-3 sm:p-4 text-sm text-red-700 bg-red-100 rounded-lg border border-red-200">
-                {error}
+                {dutyError || leaveError}
               </div>
             )}
 
@@ -174,7 +130,10 @@ export function EmployeePortal() {
               employees={employees}
               selectedEmployee={selectedEmployee}
               onSelect={setSelectedEmployee}
-              onClearError={() => setError(null)}
+              onClearError={() => {
+                clearDutyError();
+                setLeaveError(null);
+              }}
             />
 
             {selectedEmployee && (
@@ -185,6 +144,11 @@ export function EmployeePortal() {
                     <div>
                       <h2 className="text-xl sm:text-2xl font-bold">{selectedEmployee.name}</h2>
                       <p className="text-sm sm:text-base text-indigo-100">{selectedEmployee.position}</p>
+                      <p className="text-sm mt-1 text-indigo-100">
+                        Status: <span className={isOnDuty ? "text-green-300" : "text-yellow-300"}>
+                          {isOnDuty ? "On Duty" : "Off Duty"}
+                        </span>
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -193,26 +157,43 @@ export function EmployeePortal() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                   <Button
-                    onClick={handleCheckIn}
-                    disabled={!!getLastCheckIn()}
-                    variant={getLastCheckIn() ? 'secondary' : 'primary'}
-                    className="h-12 sm:h-14"
+                    onClick={() => startDuty(selectedEmployee)}
+                    disabled={isOnDuty || isDutyProcessing}
+                    variant={isOnDuty ? 'secondary' : 'primary'}
+                    className="h-12 sm:h-14 relative"
                   >
-                    <Clock className="h-5 w-5 sm:h-6 sm:w-6 mr-2" />
-                    <span className="text-sm sm:text-base">Check In</span>
+                    {isDutyProcessing ? (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></div>
+                      </div>
+                    ) : (
+                      <>
+                        <Clock className="h-5 w-5 sm:h-6 sm:w-6 mr-2" />
+                        <span className="text-sm sm:text-base">Start Duty</span>
+                      </>
+                    )}
                   </Button>
                   <Button
-                    onClick={handleCheckOut}
-                    disabled={!getLastCheckIn()}
-                    variant={!getLastCheckIn() ? 'secondary' : 'danger'}
-                    className="h-12 sm:h-14"
+                    onClick={() => endDuty(selectedEmployee)}
+                    disabled={!isOnDuty || isDutyProcessing}
+                    variant={!isOnDuty ? 'secondary' : 'danger'}
+                    className="h-12 sm:h-14 relative"
                   >
-                    <Clock className="h-5 w-5 sm:h-6 sm:w-6 mr-2" />
-                    <span className="text-sm sm:text-base">Check Out</span>
+                    {isDutyProcessing ? (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></div>
+                      </div>
+                    ) : (
+                      <>
+                        <Clock className="h-5 w-5 sm:h-6 sm:w-6 mr-2" />
+                        <span className="text-sm sm:text-base">End Duty</span>
+                      </>
+                    )}
                   </Button>
                   <Button
                     onClick={() => setShowLeaveModal(true)}
                     variant="primary"
+                    disabled={isDutyProcessing || isLeaveProcessing}
                     className="h-12 sm:h-14"
                   >
                     <Calendar className="h-5 w-5 sm:h-6 sm:w-6 mr-2" />
@@ -236,8 +217,19 @@ export function EmployeePortal() {
             <Button variant="secondary" onClick={() => setShowLeaveModal(false)}>
               Cancel
             </Button>
-            <Button variant="primary" onClick={handleLeaveRequest}>
-              Submit Request
+            <Button 
+              variant="primary" 
+              onClick={handleLeaveRequest}
+              disabled={isLeaveProcessing}
+            >
+              {isLeaveProcessing ? (
+                <div className="flex items-center">
+                  <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2"></div>
+                  Processing...
+                </div>
+              ) : (
+                'Submit Request'
+              )}
             </Button>
           </>
         }

@@ -76,7 +76,7 @@ async function sendDiscordEmbed(embed: any) {
 
 function createCheckInEmbed({ employeeName, employeePosition, date }: CheckInNotification) {
   return {
-    title: '🟢 Employee Check In',
+    title: '🟢 Employee Started Duty',
     color: COLORS.CHECK_IN,
     fields: [
       {
@@ -116,7 +116,7 @@ function createCheckOutEmbed({
   totalHours 
 }: CheckOutNotification) {
   return {
-    title: '🔴 Employee Check Out',
+    title: '🔴 Employee Ended Duty',
     color: COLORS.CHECK_OUT,
     fields: [
       {

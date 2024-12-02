@@ -12,7 +12,10 @@ export const workingHoursService = {
       .eq('employee_id', employeeId)
       .order('date', { ascending: false });
 
-    if (error) throw error;
+    if (error) {
+      throw new Error(`Failed to fetch working hours: ${error.message}`);
+    }
+    
     return (data || []).map(transformWorkingHoursData);
   },
 
@@ -20,83 +23,162 @@ export const workingHoursService = {
     validateEmployeeId(employeeId);
     validateWorkingHoursData({ date, checkIn });
 
-    // Check if there's already an active check-in
-    const { data: existing } = await supabase
-      .from('working_hours')
-      .select('*')
-      .eq('employee_id', employeeId)
-      .is('check_out', null)
-      .single();
+    try {
+      // First, check for any active sessions across all dates
+      const { data: activeSession, error: checkError } = await supabase
+        .from('working_hours')
+        .select('*')
+        .eq('employee_id', employeeId)
+        .is('check_out', null)
+        .maybeSingle();
 
-    if (existing) {
-      throw new Error('Employee already has an active check-in');
+      if (checkError) {
+        throw new Error(`Failed to check active session: ${checkError.message}`);
+      }
+
+      if (activeSession) {
+        throw new Error('Employee already has an active duty session');
+      }
+
+      // If no active session, create a new one
+      const { data, error } = await supabase
+        .from('working_hours')
+        .insert({
+          employee_id: employeeId,
+          date,
+          check_in: checkIn,
+        })
+        .select()
+        .single();
+
+      if (error) {
+        if (error.code === '23505') { // Unique constraint violation
+          throw new Error('Employee already has an active duty session');
+        }
+        throw new Error(`Failed to create working hours record: ${error.message}`);
+      }
+
+      if (!data) {
+        throw new Error('Failed to create working hours record: No data returned');
+      }
+
+      return transformWorkingHoursData(data);
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error('An unexpected error occurred while starting duty');
     }
-
-    const { data, error } = await supabase
-      .from('working_hours')
-      .insert({
-        employee_id: employeeId,
-        date,
-        check_in: checkIn,
-      })
-      .select()
-      .single();
-
-    if (error) throw error;
-    if (!data) throw new Error('Failed to create working hours record');
-
-    return transformWorkingHoursData(data);
   },
 
   async checkOut(id: string, checkOut: string, totalHours: number): Promise<WorkingHours> {
-    if (!id) throw new Error('Working hours ID is required');
-
-    // Validate the working hours record exists and hasn't been checked out
-    const { data: existing } = await supabase
-      .from('working_hours')
-      .select('*')
-      .eq('id', id)
-      .is('check_out', null)
-      .single();
-
-    if (!existing) {
-      throw new Error('No active check-in found');
+    if (!id) {
+      throw new Error('Working hours ID is required');
     }
 
-    const { data, error } = await supabase
-      .from('working_hours')
-      .update({
-        check_out: checkOut,
-        total_hours: totalHours,
-      })
-      .eq('id', id)
-      .select()
-      .single();
+    try {
+      // Validate the working hours record exists and hasn't been checked out
+      const { data: existing, error: fetchError } = await supabase
+        .from('working_hours')
+        .select('*')
+        .eq('id', id)
+        .is('check_out', null)
+        .single();
 
-    if (error) throw error;
-    if (!data) throw new Error('Failed to update working hours record');
+      if (fetchError) {
+        if (fetchError.code === 'PGRST116') {
+          throw new Error('No active duty session found');
+        }
+        throw new Error(`Failed to fetch working hours: ${fetchError.message}`);
+      }
 
-    return transformWorkingHoursData(data);
+      if (!existing) {
+        throw new Error('No active duty session found');
+      }
+
+      const { data, error } = await supabase
+        .from('working_hours')
+        .update({
+          check_out: checkOut,
+          total_hours: totalHours,
+        })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) {
+        throw new Error(`Failed to update working hours record: ${error.message}`);
+      }
+
+      if (!data) {
+        throw new Error('Failed to update working hours record: No data returned');
+      }
+
+      return transformWorkingHoursData(data);
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error('An unexpected error occurred while ending duty');
+    }
   },
 
   async updateTimeEntry(id: string, updates: Partial<WorkingHours>): Promise<WorkingHours> {
-    if (!id) throw new Error('Working hours ID is required');
+    if (!id) {
+      throw new Error('Working hours ID is required');
+    }
 
-    const { data, error } = await supabase
-      .from('working_hours')
-      .update({
-        check_in: updates.checkIn,
-        check_out: updates.checkOut,
-        total_hours: updates.totalHours,
-      })
-      .eq('id', id)
-      .select()
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('working_hours')
+        .update({
+          check_in: updates.checkIn,
+          check_out: updates.checkOut,
+          total_hours: updates.totalHours,
+        })
+        .eq('id', id)
+        .select()
+        .single();
 
-    if (error) throw error;
-    if (!data) throw new Error('Failed to update working hours record');
+      if (error) {
+        throw new Error(`Failed to update working hours record: ${error.message}`);
+      }
 
-    return transformWorkingHoursData(data);
+      if (!data) {
+        throw new Error('Failed to update working hours record: No data returned');
+      }
+
+      return transformWorkingHoursData(data);
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error('An unexpected error occurred while updating time entry');
+    }
+  },
+
+  async hasActiveSession(employeeId: string): Promise<boolean> {
+    validateEmployeeId(employeeId);
+
+    try {
+      const { data, error } = await supabase
+        .from('working_hours')
+        .select('id')
+        .eq('employee_id', employeeId)
+        .is('check_out', null)
+        .maybeSingle();
+
+      if (error) {
+        throw new Error(`Failed to check active session: ${error.message}`);
+      }
+
+      return !!data;
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error('An unexpected error occurred while checking active session');
+    }
   },
 };
 
