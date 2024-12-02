@@ -9,6 +9,15 @@ interface WageCalculationProps {
   employees: Employee[];
 }
 
+const FIXED_SALARY_POSITIONS = [
+  'Komisaris Utama',
+  'Sekretaris',
+  'Sumber Daya Manusia',
+  'Pemasaran',
+  'Bendahara',
+  'Eksekutif',
+];
+
 export function WageCalculation({ employees }: WageCalculationProps) {
   const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7));
   const [searchQuery, setSearchQuery] = useState('');
@@ -34,16 +43,17 @@ export function WageCalculation({ employees }: WageCalculationProps) {
           employee,
           monthlyHours,
           wage,
+          isFixedSalary: FIXED_SALARY_POSITIONS.includes(employee.position),
         };
       })
       .sort((a, b) => b.wage - a.wage);
   }, [employees, selectedMonth, searchQuery]);
 
   const handleExportCSV = () => {
-    const exportData = wageData.map(({ employee, monthlyHours, wage }) => ({
+    const exportData = wageData.map(({ employee, monthlyHours, wage, isFixedSalary }) => ({
       'Employee Name': employee.name,
       'Position': employee.position,
-      'Total Hours': monthlyHours.toFixed(2),
+      'Total Hours': isFixedSalary ? 'Fixed Salary' : monthlyHours.toFixed(2),
       'Wage': formatCurrency(wage),
     }));
 
@@ -92,7 +102,7 @@ export function WageCalculation({ employees }: WageCalculationProps) {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {wageData.map(({ employee, monthlyHours, wage }) => (
+                  {wageData.map(({ employee, monthlyHours, wage, isFixedSalary }) => (
                     <tr key={employee.id}>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
                         {employee.name}
@@ -101,7 +111,11 @@ export function WageCalculation({ employees }: WageCalculationProps) {
                         {employee.position}
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {monthlyHours.toFixed(2)}
+                        {isFixedSalary ? (
+                          <span className="italic text-gray-400">Fixed Salary</span>
+                        ) : (
+                          monthlyHours.toFixed(2)
+                        )}
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm font-medium text-indigo-600">
                         {formatCurrency(wage)}
