@@ -1,5 +1,5 @@
 import { Edit2, Trash2 } from 'lucide-react';
-import { formatDate, formatTime } from '../../../../utils/dateTime';
+import { formatDate, formatFullDateTime } from '../../../../utils/dateTime';
 import { formatDuration } from '../../../../utils/time';
 import type { Employee, WorkingHours } from '../../../../types';
 
@@ -42,10 +42,10 @@ export function TimeTrackingTable({ entries, onEdit, onDelete }: TimeTrackingTab
                     {formatDate(hours.date)}
                   </td>
                   <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                    {formatTime(hours.checkIn)}
+                    {formatFullDateTime(hours.checkIn)}
                   </td>
                   <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                    {hours.checkOut ? formatTime(hours.checkOut) : 'Active'}
+                    {hours.checkOut ? formatFullDateTime(hours.checkOut) : 'Active'}
                   </td>
                   <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                     {formatDuration(hours.totalHours)}

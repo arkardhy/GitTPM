@@ -61,6 +61,24 @@ export async function checkOut(id: string, checkOut: string, totalHours: number)
   return transformWorkingHoursData(data);
 }
 
+export async function create(employeeId: string, entries: Partial<WorkingHours>[]): Promise<WorkingHours[]> {
+  const { data, error } = await supabase
+    .from('working_hours')
+    .insert(
+      entries.map(entry => ({
+        employee_id: employeeId,
+        date: entry.date,
+        check_in: entry.checkIn,
+        check_out: entry.checkOut,
+        total_hours: entry.totalHours || 0,
+      }))
+    )
+    .select();
+
+  if (error) throw error;
+  return data.map(transformWorkingHoursData);
+}
+
 export async function updateTimeEntry(id: string, updates: Partial<WorkingHours>): Promise<WorkingHours> {
   const { data, error } = await supabase
     .from('working_hours')

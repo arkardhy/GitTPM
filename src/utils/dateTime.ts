@@ -32,13 +32,18 @@ export function formatTimeForInput(date: string | Date): string {
   return format(new Date(date), 'HH:mm');
 }
 
-export function parseDate(dateStr: string): string {
-  // Input date is in yyyy-MM-dd format from the date input
-  return dateStr;
+export function parseDateTime(date: string, time: string): Date {
+  const [year, month, day] = date.split('-').map(Number);
+  const [hours, minutes] = time.split(':').map(Number);
+  
+  const result = new Date(year, month - 1, day, hours, minutes);
+  if (isNaN(result.getTime())) {
+    throw new Error('Invalid date or time format');
+  }
+  
+  return result;
 }
 
-export function parseTime(date: string, timeStr: string): Date {
-  // Combine date and time strings
-  const dateTime = new Date(`${date}T${timeStr}`);
-  return dateTime;
+export function formatFullDateTime(date: string | Date): string {
+  return format(new Date(date), 'dd/MM/yyyy HH:mm:ss');
 }

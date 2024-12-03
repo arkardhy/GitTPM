@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Modal } from './Modal';
 import { Button } from './Button';
 import type { Employee, WorkingHours } from '../../types';
-import { formatDateForInput, formatTimeForInput, parseDate, parseTime } from '../../utils/dateTime';
+import { formatDateForInput, formatTimeForInput, parseDateTime } from '../../utils/dateTime';
 
 interface TimeEntryModalProps {
   isOpen: boolean;
@@ -26,8 +26,18 @@ export function TimeEntryModal({
   initialData 
 }: TimeEntryModalProps) {
   const [date, setDate] = useState(initialData?.date || new Date().toISOString().slice(0, 10));
-  const [checkIn, setCheckIn] = useState(initialData?.checkIn ? formatTimeForInput(initialData.checkIn) : '');
-  const [checkOut, setCheckOut] = useState(initialData?.checkOut ? formatTimeForInput(initialData.checkOut) : '');
+  const [checkInDate, setCheckInDate] = useState(
+    initialData?.checkIn ? formatDateForInput(initialData.checkIn) : date
+  );
+  const [checkInTime, setCheckInTime] = useState(
+    initialData?.checkIn ? formatTimeForInput(initialData.checkIn) : ''
+  );
+  const [checkOutDate, setCheckOutDate] = useState(
+    initialData?.checkOut ? formatDateForInput(initialData.checkOut) : date
+  );
+  const [checkOutTime, setCheckOutTime] = useState(
+    initialData?.checkOut ? formatTimeForInput(initialData.checkOut) : ''
+  );
   const [error, setError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -37,7 +47,7 @@ export function TimeEntryModal({
       return;
     }
 
-    if (!date || !checkIn) {
+    if (!date || !checkInDate || !checkInTime) {
       setError('Date and Check-in time are required');
       return;
     }
@@ -46,9 +56,9 @@ export function TimeEntryModal({
       setIsProcessing(true);
       setError(null);
 
-      const parsedDate = parseDate(date);
-      const checkInDateTime = parseTime(parsedDate, checkIn);
-      const checkOutDateTime = checkOut ? parseTime(parsedDate, checkOut) : null;
+      const checkInDateTime = parseDateTime(checkInDate, checkInTime);
+      const checkOutDateTime = checkOutDate && checkOutTime ? 
+        parseDateTime(checkOutDate, checkOutTime) : null;
 
       if (checkOutDateTime && checkInDateTime >= checkOutDateTime) {
         setError('Check-out time must be after check-in time');
@@ -60,7 +70,7 @@ export function TimeEntryModal({
         : 0;
 
       await onSave({
-        date: parsedDate,
+        date,
         checkIn: checkInDateTime.toISOString(),
         checkOut: checkOutDateTime?.toISOString() || null,
         totalHours,
@@ -123,35 +133,56 @@ export function TimeEntryModal({
         )}
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Date</label>
+          <label className="block text-sm font-medium text-gray-700">Entry Date</label>
           <input
             type="date"
             value={date}
-            onChange={(e) => setDate(e.target.value)}
+            onChange={(e) => {
+              setDate(e.target.value);
+              // Update check-in/out dates if they haven't been modified
+              if (date === checkInDate) setCheckInDate(e.target.value);
+              if (date === checkOutDate) setCheckOutDate(e.target.value);
+            }}
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Check-in Time</label>
-          <input
-            type="time"
-            value={checkIn}
-            onChange={(e) => setCheckIn(e.target.value)}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-            step="1"
-          />
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">Check-in</label>
+          <div className="grid grid-cols-2 gap-2">
+            <input
+              type="date"
+              value={checkInDate}
+              onChange={(e) => setCheckInDate(e.target.value)}
+              className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            />
+            <input
+              type="time"
+              value={checkInTime}
+              onChange={(e) => setCheckInTime(e.target.value)}
+              className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              step="1"
+            />
+          </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Check-out Time</label>
-          <input
-            type="time"
-            value={checkOut}
-            onChange={(e) => setCheckOut(e.target.value)}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-            step="1"
-          />
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">Check-out</label>
+          <div className="grid grid-cols-2 gap-2">
+            <input
+              type="date"
+              value={checkOutDate}
+              onChange={(e) => setCheckOutDate(e.target.value)}
+              className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            />
+            <input
+              type="time"
+              value={checkOutTime}
+              onChange={(e) => setCheckOutTime(e.target.value)}
+              className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              step="1"
+            />
+          </div>
         </div>
       </div>
     </Modal>
