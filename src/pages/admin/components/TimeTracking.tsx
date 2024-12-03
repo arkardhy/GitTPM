@@ -36,7 +36,9 @@ export function TimeTracking() {
 
   const filteredTimeEntries = useMemo(() => {
     const searchLower = searchQuery.toLowerCase();
-    return employees.flatMap(employee => 
+    const entries: Array<{ hours: WorkingHours; employee: Employee }> = [];
+
+    employees.forEach(employee => {
       employee.workingHours
         .filter(hours => hours.date.startsWith(selectedMonth))
         .filter(hours => {
@@ -46,11 +48,14 @@ export function TimeTracking() {
           
           return matchesName || matchesPosition || matchesDate;
         })
-        .map(hours => ({
-          hours,
-          employee
-        }))
-    ).sort((a, b) => new Date(b.hours.date).getTime() - new Date(a.hours.date).getTime());
+        .forEach(hours => {
+          entries.push({ hours, employee });
+        });
+    });
+
+    return entries.sort((a, b) => 
+      new Date(b.hours.date).getTime() - new Date(a.hours.date).getTime()
+    );
   }, [employees, selectedMonth, searchQuery]);
 
   const handleExportCSV = () => {
@@ -83,13 +88,17 @@ export function TimeTracking() {
   };
 
   const handleSaveTimeEntry = async (updatedEntry: Partial<WorkingHours>) => {
+    if (!selectedEmployee) {
+      throw new Error('No employee selected');
+    }
+
     try {
       if (selectedEntry) {
         await workingHoursService.updateTimeEntry(selectedEntry.id, {
           ...selectedEntry,
           ...updatedEntry,
         });
-      } else if (selectedEmployee) {
+      } else {
         await workingHoursService.create(selectedEmployee.id, updatedEntry);
       }
       await loadEmployees();

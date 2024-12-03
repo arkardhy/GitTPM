@@ -12,7 +12,7 @@ const HOURLY_RATES = {
   'Training': 8000,
   'Staff Ahli': 10000,
   // Default rate for other positions
-  default: 0
+  default: 8000
 } as const;
 
 const BONUS_CONFIG = {
@@ -30,7 +30,7 @@ export interface WageBreakdown {
 
 function calculateHourlyWage(position: string, hours: number): WageBreakdown {
   const rate = HOURLY_RATES[position as keyof typeof HOURLY_RATES] || HOURLY_RATES.default;
-  const baseWage = rate * hours;
+  const baseWage = Math.max(0, rate * hours);
   
   // Calculate overtime bonus for eligible positions
   let performanceBonus = 0;
@@ -43,15 +43,24 @@ function calculateHourlyWage(position: string, hours: number): WageBreakdown {
   // Add fixed bonus for Staff Ahli
   const fixedBonus = position === 'Staff Ahli' ? BONUS_CONFIG.STAFF_AHLI_FIXED_BONUS : 0;
 
+  const totalWage = baseWage + performanceBonus + fixedBonus;
   return {
     baseWage,
     performanceBonus,
     fixedBonus,
-    totalWage: baseWage + performanceBonus + fixedBonus
+    totalWage
   };
 }
 
 export function calculateWage(position: string, hours: number): WageBreakdown {
+  if (!position) {
+    throw new Error('Position is required');
+  }
+
+  if (typeof hours !== 'number' || isNaN(hours)) {
+    throw new Error('Invalid hours value');
+  }
+
   // Check if position has a fixed salary
   if (position in FIXED_SALARIES) {
     const fixedSalary = FIXED_SALARIES[position as keyof typeof FIXED_SALARIES];
@@ -68,6 +77,10 @@ export function calculateWage(position: string, hours: number): WageBreakdown {
 }
 
 export function formatCurrency(amount: number): string {
+  if (typeof amount !== 'number' || isNaN(amount)) {
+    return 'Invalid Amount';
+  }
+
   return new Intl.NumberFormat('id-ID', {
     style: 'currency',
     currency: 'IDR',
