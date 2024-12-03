@@ -1,19 +1,33 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { storage } from '../../utils/storage';
+import { verifyAdminPassword } from '../../utils/auth';
 
 export function AdminLogin() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === '@T24n5_Kk') { // In a real app, use proper authentication
-      storage.setAdminToken('dummy-token');
-      navigate('/admin');
-    } else {
-      setError('Invalid password');
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const isValid = await verifyAdminPassword(password);
+      
+      if (isValid) {
+        storage.setAdminToken('authenticated');
+        navigate('/admin');
+      } else {
+        setError('Invalid password');
+      }
+    } catch (err) {
+      setError('An error occurred during login');
+      console.error('Login error:', err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -45,13 +59,22 @@ export function AdminLogin() {
               placeholder="Admin Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              disabled={isLoading}
             />
           </div>
           <button
             type="submit"
-            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={isLoading}
           >
-            Masuk
+            {isLoading ? (
+              <div className="flex items-center">
+                <div className="animate-spin h-5 w-5 mr-2 border-2 border-white border-t-transparent rounded-full"></div>
+                Processing...
+              </div>
+            ) : (
+              'Masuk'
+            )}
           </button>
         </form>
       </div>
