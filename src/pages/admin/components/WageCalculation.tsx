@@ -81,8 +81,21 @@ export function WageCalculation({ employees }: WageCalculationProps) {
       .sort((a, b) => b.wageBreakdown.totalWage - a.wageBreakdown.totalWage);
   }, [employees, selectedMonth, searchQuery, withdrawnEmployees]);
 
-  const handleExportCSV = () => {
-    exportToExcel(wageData, 'wage-calculation', {
+  const handleExportExcel = () => {
+    const exportData: WageExportData[] = wageData.map(data => ({
+      ...data,
+      employee: {
+        id: data.employee.id,
+        name: data.employee.name,
+        position: data.employee.position,
+      },
+      monthlyHours: data.monthlyHours,
+      wageBreakdown: data.wageBreakdown,
+      isFixedSalary: data.isFixedSalary,
+      isWithdrawn: data.isWithdrawn,
+    }));
+
+    exportToExcel(exportData, 'wage-calculation', {
       filename: `wage_calculation_${selectedMonth}`,
       sheetName: 'Wage Calculation',
     });
@@ -127,7 +140,7 @@ export function WageCalculation({ employees }: WageCalculationProps) {
                 className="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
               />
               <button
-                onClick={handleExportCSV}
+                onClick={handleExportExcel}
                 className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
               >
                 <Download className="h-5 w-5 mr-2" />
