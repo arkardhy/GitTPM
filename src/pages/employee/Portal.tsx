@@ -114,14 +114,14 @@ export function EmployeePortal() {
     <div className="min-h-screen bg-[#F8FAFC]">
       <Header showNavigation={false} />
 
-      <main className="pt-16 sm:pt-20 px-4 sm:px-6 lg:px-8">
+      <main className="pt-24 sm:pt-28 px-4 sm:px-6 lg:px-8 pb-12">
         <div className="max-w-3xl mx-auto">
-          <div className="bg-white rounded-xl shadow-lg p-6 md:p-8">
-            <div className="flex items-center justify-center mb-8">
+          <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 md:p-8">
+            <div className="flex flex-col items-center justify-center mb-6 sm:mb-8">
               <div className="p-3 bg-gradient-to-br from-[#105283] to-[#2D85B2] rounded-full">
-                <UserCircle className="h-8 w-8 text-white" />
+                <UserCircle className="h-8 w-8 sm:h-10 sm:w-10 text-white" />
               </div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-[#105283] ml-4">
+              <h1 className="text-2xl sm:text-3xl font-bold text-[#105283] mt-4 text-center">
                 Trans Check Log
               </h1>
             </div>
@@ -144,15 +144,15 @@ export function EmployeePortal() {
 
             {selectedEmployee && (
               <div className="space-y-6">
-                <div className="bg-gradient-to-br from-[#105283] to-[#2D85B2] rounded-lg p-6 transform transition-all duration-200 hover:scale-[1.02]">
-                  <div className="flex items-center space-x-4">
+                <div className="bg-gradient-to-br from-[#105283] to-[#2D85B2] rounded-lg p-4 sm:p-6 transform transition-all duration-200 hover:scale-[1.02]">
+                  <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4">
                     <div className="bg-white/10 rounded-full p-4">
-                      <UserCircle className="h-12 w-12 text-white" />
+                      <UserCircle className="h-10 w-10 sm:h-12 sm:w-12 text-white" />
                     </div>
-                    <div>
-                      <h2 className="text-2xl font-bold text-white">{selectedEmployee.name}</h2>
-                      <p className="text-[#E5F2F9] opacity-90">{selectedEmployee.position}</p>
-                      <div className="flex items-center mt-2">
+                    <div className="text-center sm:text-left">
+                      <h2 className="text-xl sm:text-2xl font-bold text-white">{selectedEmployee.name}</h2>
+                      <p className="text-[#E5F2F9] opacity-90 text-sm sm:text-base">{selectedEmployee.position}</p>
+                      <div className="flex items-center justify-center sm:justify-start mt-2">
                         <div className={`w-2 h-2 rounded-full ${isOnDuty ? 'bg-green-400' : 'bg-yellow-400'} mr-2`}></div>
                         <p className="text-sm text-[#E5F2F9]">
                           {isOnDuty ? "On Duty" : "Off Duty"}
@@ -164,12 +164,12 @@ export function EmployeePortal() {
 
                 <EmployeeStats employee={selectedEmployee} />
 
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
                   <Button
                     onClick={() => startDuty(selectedEmployee)}
                     disabled={isOnDuty || isDutyProcessing}
                     variant={isOnDuty ? 'secondary' : 'primary'}
-                    className="h-14 relative bg-[#105283] hover:bg-[#0A3B5C] transition-all duration-200"
+                    className="h-14 relative bg-[#105283] hover:bg-[#0A3B5C] transition-all duration-200 text-sm sm:text-base"
                   >
                     {isDutyProcessing ? (
                       <div className="absolute inset-0 flex items-center justify-center">
@@ -177,8 +177,8 @@ export function EmployeePortal() {
                       </div>
                     ) : (
                       <>
-                        <Clock className="h-5 w-5 sm:h-6 sm:w-6 mr-2" />
-                        <span className="text-sm sm:text-base">On Duty</span>
+                        <Clock className="h-5 w-5 mr-2" />
+                        On Duty
                       </>
                     )}
                   </Button>
@@ -186,7 +186,7 @@ export function EmployeePortal() {
                     onClick={() => endDuty(selectedEmployee)}
                     disabled={!isOnDuty || isDutyProcessing}
                     variant={!isOnDuty ? 'secondary' : 'danger'}
-                    className="h-14 relative transition-all duration-200"
+                    className="h-14 relative transition-all duration-200 text-sm sm:text-base"
                   >
                     {isDutyProcessing ? (
                       <div className="absolute inset-0 flex items-center justify-center">
@@ -194,8 +194,8 @@ export function EmployeePortal() {
                       </div>
                     ) : (
                       <>
-                        <Clock className="h-5 w-5 sm:h-6 sm:w-6 mr-2" />
-                        <span className="text-sm sm:text-base">Off Duty</span>
+                        <Clock className="h-5 w-5 mr-2" />
+                        Off Duty
                       </>
                     )}
                   </Button>
@@ -203,10 +203,10 @@ export function EmployeePortal() {
                     onClick={() => setShowLeaveModal(true)}
                     variant="primary"
                     disabled={isDutyProcessing || isLeaveProcessing}
-                    className="h-14 bg-[#2D85B2] hover:bg-[#206E9D] transition-all duration-200"
+                    className="h-14 bg-[#2D85B2] hover:bg-[#206E9D] transition-all duration-200 text-sm sm:text-base"
                   >
-                    <Calendar className="h-5 w-5 sm:h-6 sm:w-6 mr-2" />
-                    <span className="text-sm sm:text-base">Cuti</span>
+                    <Calendar className="h-5 w-5 mr-2" />
+                    Cuti
                   </Button>
                   <ResignationForm 
                     employee={selectedEmployee}

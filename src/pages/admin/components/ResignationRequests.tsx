@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Download, Search, FileText } from 'lucide-react';
 import { employeeService } from '../../../services/employeeService';
 import { resignationService } from '../../../services/resignationService';
 import { discordNotifications } from '../../../utils/discord';
 import { exportToCSV } from '../../../utils/csv';
 import type { Employee, ResignationRequest } from '../../../types';
-import { Button } from '../../../components/ui/Button';
 import { Modal } from '../../../components/ui/Modal';
-import { SearchBar } from '../../../components/ui/SearchBar';
+import { Button } from '../../../components/ui/Button';
+import { ResignationFilters } from '../../../components/resignation/ResignationFilters';
 import { ResignationGrid } from '../../../components/resignation/ResignationGrid';
 import { formatDayMonthYear } from '../../../utils/dateTime';
 
@@ -154,34 +153,11 @@ export function ResignationRequests() {
   return (
     <div className="bg-white rounded-xl shadow-lg">
       <div className="p-6 space-y-6">
-        {/* Header */}
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 bg-[#105283]/10 rounded-lg">
-              <FileText className="h-6 w-6 text-[#105283]" />
-            </div>
-            <h2 className="text-2xl font-bold text-[#105283]">Resignation Requests</h2>
-          </div>
-
-          <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
-            <div className="relative flex-1 sm:w-64">
-              <SearchBar
-                value={searchQuery}
-                onChange={setSearchQuery}
-                placeholder="Search requests..."
-              />
-            </div>
-
-            <Button
-              onClick={handleExportCSV}
-              variant="secondary"
-              className="inline-flex items-center"
-            >
-              <Download className="h-5 w-5 mr-2" />
-              Export CSV
-            </Button>
-          </div>
-        </div>
+        <ResignationFilters
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          onExport={handleExportCSV}
+        />
 
         {error && (
           <div className="p-4 text-sm text-red-700 bg-red-50 rounded-lg border border-red-100">
@@ -191,9 +167,9 @@ export function ResignationRequests() {
 
         <ResignationGrid
           requests={filteredRequests}
-          onApprove={(request) => handleApprove(request)}
-          onReject={(request) => handleReject(request)}
-          onDelete={(request) => handleDelete(request)}
+          onApprove={handleApprove}
+          onReject={handleReject}
+          onDelete={handleDelete}
           onViewDetails={(request) => {
             setSelectedRequest(request);
             setShowDetailsModal(true);

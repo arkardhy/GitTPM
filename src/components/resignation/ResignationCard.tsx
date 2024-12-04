@@ -30,6 +30,7 @@ export function ResignationCard({
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-200">
       <div className="p-6">
+        {/* Header */}
         <div className="flex items-start justify-between">
           <div className="flex items-center space-x-4">
             <div className="bg-gradient-to-br from-[#105283] to-[#2D85B2] rounded-full p-3">
@@ -44,12 +45,14 @@ export function ResignationCard({
             </div>
           </div>
 
+          {/* Action Buttons */}
           <div className="flex space-x-2">
             {request.status === 'pending' && (
               <>
                 <button
                   onClick={onApprove}
                   className="text-green-600 hover:text-green-800 p-2 rounded-full hover:bg-green-50 transition-colors duration-200"
+                  title="Approve"
                 >
                   <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -58,6 +61,7 @@ export function ResignationCard({
                 <button
                   onClick={onReject}
                   className="text-red-600 hover:text-red-800 p-2 rounded-full hover:bg-red-50 transition-colors duration-200"
+                  title="Reject"
                 >
                   <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -68,6 +72,7 @@ export function ResignationCard({
             <button
               onClick={onViewDetails}
               className="text-[#2D85B2] hover:text-[#105283] p-2 rounded-full hover:bg-[#F8FAFC] transition-colors duration-200"
+              title="View Details"
             >
               <FileText className="h-5 w-5" />
             </button>
@@ -75,6 +80,7 @@ export function ResignationCard({
               <button
                 onClick={onDelete}
                 className="text-red-600 hover:text-red-800 p-2 rounded-full hover:bg-red-50 transition-colors duration-200"
+                title="Delete"
               >
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -84,6 +90,7 @@ export function ResignationCard({
           </div>
         </div>
 
+        {/* Details */}
         <div className="mt-4 grid grid-cols-2 gap-4">
           <div className="flex items-center space-x-2">
             <Calendar className="h-5 w-5 text-gray-400" />
@@ -101,6 +108,7 @@ export function ResignationCard({
           </div>
         </div>
 
+        {/* Submission Time */}
         <div className="mt-4 pt-4 border-t border-gray-100">
           <p className="text-xs font-medium text-gray-500">Submitted</p>
           <p className="mt-1 text-sm text-gray-900">{formatDateTime(request.createdAt)}</p>
