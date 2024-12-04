@@ -115,14 +115,14 @@ export function TimeTracking() {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-4 border-[#2D85B2] border-t-transparent"></div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white shadow rounded-lg">
-      <div className="px-4 py-5 sm:p-6">
+    <div className="bg-white rounded-xl shadow-lg">
+      <div className="px-6 py-8">
         <TimeTrackingHeader
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
@@ -137,7 +137,7 @@ export function TimeTracking() {
         />
 
         {error && (
-          <div className="mb-4 p-4 text-sm text-red-700 bg-red-100 rounded-lg">
+          <div className="mb-6 p-4 text-sm text-red-700 bg-red-50 rounded-lg border border-red-100">
             {error}
           </div>
         )}

@@ -102,8 +102,8 @@ export function EmployeePortal() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-white flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#2D85B2] border-t-transparent"></div>
       </div>
     );
   }
@@ -111,18 +111,18 @@ export function EmployeePortal() {
   const isOnDuty = !!getLastDutySession();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-white">
+    <div className="min-h-screen bg-[#F8FAFC]">
       <Header showNavigation={false} />
 
       <main className="pt-16 sm:pt-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mx-auto">
-          <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 md:p-8">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 text-center mb-6">
+          <div className="bg-white rounded-xl shadow-lg p-6 md:p-8">
+            <h1 className="text-2xl sm:text-3xl font-bold text-[#105283] text-center mb-8">
               Trans Check Log
             </h1>
             
             {(dutyError || leaveError) && (
-              <div className="mb-6 p-3 sm:p-4 text-sm text-red-700 bg-red-100 rounded-lg border border-red-200">
+              <div className="mb-6 p-4 text-sm text-red-700 bg-red-100 rounded-lg border border-red-200">
                 {dutyError || leaveError}
               </div>
             )}
@@ -139,13 +139,13 @@ export function EmployeePortal() {
 
             {selectedEmployee && (
               <div className="space-y-6">
-                <div className="bg-gradient-to-r from-indigo-600 to-blue-600 rounded-lg p-4 sm:p-6 text-white">
-                  <div className="flex items-center space-x-3 sm:space-x-4">
-                    <UserCircle className="h-12 w-12 sm:h-16 sm:w-16" />
+                <div className="bg-gradient-to-r from-[#105283] to-[#2D85B2] rounded-lg p-6 text-white">
+                  <div className="flex items-center space-x-4">
+                    <UserCircle className="h-16 w-16" />
                     <div>
-                      <h2 className="text-xl sm:text-2xl font-bold">{selectedEmployee.name}</h2>
-                      <p className="text-sm sm:text-base text-indigo-100">{selectedEmployee.position}</p>
-                      <p className="text-sm mt-1 text-indigo-100">
+                      <h2 className="text-2xl font-bold">{selectedEmployee.name}</h2>
+                      <p className="text-[#E5F2F9]">{selectedEmployee.position}</p>
+                      <p className="text-sm mt-1 text-[#E5F2F9]">
                         Status: <span className={isOnDuty ? "text-green-300" : "text-yellow-300"}>
                           {isOnDuty ? "On Duty" : "Off Duty"}
                         </span>
@@ -156,12 +156,12 @@ export function EmployeePortal() {
 
                 <EmployeeStats employee={selectedEmployee} />
 
-                <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 sm:gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                   <Button
                     onClick={() => startDuty(selectedEmployee)}
                     disabled={isOnDuty || isDutyProcessing}
                     variant={isOnDuty ? 'secondary' : 'primary'}
-                    className="h-12 sm:h-14 relative"
+                    className="h-14 relative bg-[#105283] hover:bg-[#0A3B5C]"
                   >
                     {isDutyProcessing ? (
                       <div className="absolute inset-0 flex items-center justify-center">
@@ -169,8 +169,8 @@ export function EmployeePortal() {
                       </div>
                     ) : (
                       <>
-                        <Clock className="h-5 w-5 sm:h-6 sm:w-6 mr-2" />
-                        <span className="text-sm sm:text-base">On Duty</span>
+                        <Clock className="h-6 w-6 mr-2" />
+                        <span>On Duty</span>
                       </>
                     )}
                   </Button>
@@ -178,7 +178,7 @@ export function EmployeePortal() {
                     onClick={() => endDuty(selectedEmployee)}
                     disabled={!isOnDuty || isDutyProcessing}
                     variant={!isOnDuty ? 'secondary' : 'danger'}
-                    className="h-12 sm:h-14 relative"
+                    className="h-14 relative"
                   >
                     {isDutyProcessing ? (
                       <div className="absolute inset-0 flex items-center justify-center">
@@ -186,8 +186,8 @@ export function EmployeePortal() {
                       </div>
                     ) : (
                       <>
-                        <Clock className="h-5 w-5 sm:h-6 sm:w-6 mr-2" />
-                        <span className="text-sm sm:text-base">Off Duty</span>
+                        <Clock className="h-6 w-6 mr-2" />
+                        <span>Off Duty</span>
                       </>
                     )}
                   </Button>
@@ -195,10 +195,10 @@ export function EmployeePortal() {
                     onClick={() => setShowLeaveModal(true)}
                     variant="primary"
                     disabled={isDutyProcessing || isLeaveProcessing}
-                    className="h-12 sm:h-14"
+                    className="h-14 bg-[#2D85B2] hover:bg-[#206E9D]"
                   >
-                    <Calendar className="h-5 w-5 sm:h-6 sm:w-6 mr-2" />
-                    <span className="text-sm sm:text-base">Ajukan Cuti</span>
+                    <Calendar className="h-6 w-6 mr-2" />
+                    <span>Ajukan Cuti</span>
                   </Button>
                   <ResignationForm 
                     employee={selectedEmployee}
@@ -226,6 +226,7 @@ export function EmployeePortal() {
               variant="primary" 
               onClick={handleLeaveRequest}
               disabled={isLeaveProcessing}
+              className="bg-[#105283] hover:bg-[#0A3B5C]"
             >
               {isLeaveProcessing ? (
                 <div className="flex items-center">
@@ -246,7 +247,7 @@ export function EmployeePortal() {
               type="date"
               value={leaveRequest.startDate}
               onChange={(e) => setLeaveRequest({ ...leaveRequest, startDate: e.target.value })}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#2D85B2] focus:ring-[#2D85B2] sm:text-sm"
               min={new Date().toISOString().split('T')[0]}
             />
           </div>
@@ -256,7 +257,7 @@ export function EmployeePortal() {
               type="date"
               value={leaveRequest.endDate}
               onChange={(e) => setLeaveRequest({ ...leaveRequest, endDate: e.target.value })}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#2D85B2] focus:ring-[#2D85B2] sm:text-sm"
               min={leaveRequest.startDate || new Date().toISOString().split('T')[0]}
             />
           </div>
@@ -266,7 +267,7 @@ export function EmployeePortal() {
               value={leaveRequest.reason}
               onChange={(e) => setLeaveRequest({ ...leaveRequest, reason: e.target.value })}
               rows={3}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#2D85B2] focus:ring-[#2D85B2] sm:text-sm"
               placeholder="Please provide a detailed reason for your leave request..."
             />
           </div>
