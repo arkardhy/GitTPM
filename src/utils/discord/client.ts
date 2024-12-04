@@ -1,8 +1,4 @@
-const DISCORD_WEBHOOK_URL = import.meta.env.VITE_DISCORD_WEBHOOK_URL;
-const DISCORD_RESIGNATION_WEBHOOK_URL = import.meta.env.VITE_DISCORD_RESIGNATION_WEBHOOK_URL;
-const DISCORD_LEAVE_WEBHOOK_URL = import.meta.env.VITE_DISCORD_LEAVE_WEBHOOK_URL;
-
-export async function sendDiscordEmbed(embed: any, webhookUrl: string = DISCORD_WEBHOOK_URL): Promise<void> {
+export async function sendDiscordEmbed(embed: any, webhookUrl: string): Promise<void> {
   if (!webhookUrl) {
     console.warn('Discord notification skipped: webhook URL not configured');
     return;
@@ -39,9 +35,3 @@ export async function sendDiscordEmbed(embed: any, webhookUrl: string = DISCORD_
     }
   }
 }
-
-export const webhooks = {
-  default: DISCORD_WEBHOOK_URL,
-  resignation: DISCORD_RESIGNATION_WEBHOOK_URL,
-  leave: DISCORD_LEAVE_WEBHOOK_URL,
-} as const;
