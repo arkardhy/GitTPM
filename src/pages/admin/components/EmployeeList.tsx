@@ -5,6 +5,7 @@ import { exportToCSV } from '../../../utils/csv';
 import type { Employee } from '../../../types';
 import { Button } from '../../../components/ui/Button';
 import { Modal } from '../../../components/ui/Modal';
+import { ConfirmationDialog } from '../../../components/ui/ConfirmationDialog';
 
 const POSITIONS = [
   'Komisaris Utama',
@@ -25,6 +26,10 @@ export function EmployeeList() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
+  const [deleteConfirmation, setDeleteConfirmation] = useState<{
+    show: boolean;
+    employee: Employee | null;
+  }>({ show: false, employee: null });
   const [newEmployee, setNewEmployee] = useState({
     name: '',
     position: POSITIONS[0],
@@ -82,10 +87,17 @@ export function EmployeeList() {
     }
   };
 
-  const handleDeleteEmployee = async (id: string) => {
+  const handleDeleteClick = (employee: Employee) => {
+    setDeleteConfirmation({ show: true, employee });
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteConfirmation.employee) return;
+
     try {
-      await employeeService.delete(id);
-      setEmployees(employees.filter(emp => emp.id !== id));
+      await employeeService.delete(deleteConfirmation.employee.id);
+      setEmployees(employees.filter(emp => emp.id !== deleteConfirmation.employee?.id));
+      setDeleteConfirmation({ show: false, employee: null });
     } catch (err) {
       setError('Failed to delete employee');
       console.error(err);
@@ -154,16 +166,16 @@ export function EmployeeList() {
                         {new Date(employee.joinDate).toLocaleDateString()}
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        <div className="flex space-x-2">
+                        <div className="flex items-center space-x-4">
                           <button
                             onClick={() => handleEditClick(employee)}
-                            className="text-blue-600 hover:text-blue-900"
+                            className="text-blue-600 hover:text-blue-900 p-1 rounded-full hover:bg-blue-50 transition-colors duration-200"
                           >
                             <Edit2 className="h-5 w-5" />
                           </button>
                           <button
-                            onClick={() => handleDeleteEmployee(employee.id)}
-                            className="text-red-600 hover:text-red-900"
+                            onClick={() => handleDeleteClick(employee)}
+                            className="text-red-600 hover:text-red-900 p-1 rounded-full hover:bg-red-50 transition-colors duration-200"
                           >
                             <Trash2 className="h-5 w-5" />
                           </button>
@@ -272,6 +284,16 @@ export function EmployeeList() {
           </div>
         )}
       </Modal>
+
+      <ConfirmationDialog
+        isOpen={deleteConfirmation.show}
+        onClose={() => setDeleteConfirmation({ show: false, employee: null })}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Employee"
+        message={`Are you sure you want to delete ${deleteConfirmation.employee?.name}? This action cannot be undone.`}
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+      />
     </div>
   );
 }
