@@ -2,7 +2,11 @@ import { useState, useEffect, useMemo } from 'react';
 import { employeeService } from '../../../services/employeeService';
 import { workingHoursService } from '../../../services/workingHoursService';
 import { exportToCSV } from '../../../utils/csv';
+import { downloadTimeTrackingTemplate } from '../../../utils/excel/templates';
+import { importTimeEntries } from '../../../services/time-tracking/timeTrackingService';
 import { TimeEntryModal } from '../../../components/ui/TimeEntryModal';
+import { ImportResultModal } from '../../../components/ui/ImportResultModal';
+import { ConfirmationDialog } from '../../../components/ui/ConfirmationDialog';
 import type { Employee, WorkingHours } from '../../../types';
 import { TimeTrackingHeader } from './time-tracking/TimeTrackingHeader';
 import { TimeTrackingTable } from './time-tracking/TimeTrackingTable';
@@ -17,6 +21,20 @@ export function TimeTracking() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [importing, setImporting] = useState(false);
+  const [importResults, setImportResults] = useState<{
+    show: boolean;
+    success: number;
+    failed: number;
+    errors: string[];
+  }>({
+    show: false,
+    success: 0,
+    failed: 0,
+    errors: [],
+  });
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [entryToDelete, setEntryToDelete] = useState<WorkingHours | null>(null);
 
   useEffect(() => {
     loadEmployees();
@@ -58,6 +76,28 @@ export function TimeTracking() {
     );
   }, [employees, selectedMonth, searchQuery]);
 
+  const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setImporting(true);
+      const results = await importTimeEntries(file, employees);
+      setImportResults({
+        show: true,
+        ...results,
+      });
+      await loadEmployees();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to import time entries');
+    } finally {
+      setImporting(false);
+      if (event.target) {
+        event.target.value = '';
+      }
+    }
+  };
+
   const handleExportCSV = () => {
     const timeTrackingData = filteredTimeEntries.map(({ hours, employee }) => ({
       ...hours,
@@ -73,14 +113,19 @@ export function TimeTracking() {
     setShowEditModal(true);
   };
 
-  const handleDelete = async (entry: WorkingHours) => {
-    if (!confirm('Are you sure you want to delete this time entry?')) {
-      return;
-    }
+  const handleDelete = (entry: WorkingHours) => {
+    setEntryToDelete(entry);
+    setShowDeleteConfirmation(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!entryToDelete) return;
 
     try {
-      await workingHoursService.delete(entry.id);
+      await workingHoursService.delete(entryToDelete.id);
       await loadEmployees();
+      setShowDeleteConfirmation(false);
+      setEntryToDelete(null);
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete time entry');
@@ -99,7 +144,7 @@ export function TimeTracking() {
           ...updatedEntry,
         });
       } else {
-        await workingHoursService.create(selectedEmployee.id, updatedEntry);
+        await workingHoursService.create(selectedEmployee.id, [updatedEntry]);
       }
       await loadEmployees();
       setError(null);
@@ -122,7 +167,7 @@ export function TimeTracking() {
 
   return (
     <div className="bg-white rounded-xl shadow-lg">
-      <div className="px-6 py-8">
+      <div className="p-6">
         <TimeTrackingHeader
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
@@ -134,6 +179,9 @@ export function TimeTracking() {
             setShowAddModal(true);
           }}
           onExport={handleExportCSV}
+          onImport={handleImport}
+          onDownloadTemplate={downloadTimeTrackingTemplate}
+          importing={importing}
         />
 
         {error && (
@@ -175,6 +223,25 @@ export function TimeTracking() {
         employees={employees}
         onEmployeeSelect={setSelectedEmployee}
         onSave={handleSaveTimeEntry}
+      />
+
+      <ImportResultModal
+        isOpen={importResults.show}
+        onClose={() => setImportResults({ ...importResults, show: false })}
+        results={importResults}
+      />
+
+      <ConfirmationDialog
+        isOpen={showDeleteConfirmation}
+        onClose={() => {
+          setShowDeleteConfirmation(false);
+          setEntryToDelete(null);
+        }}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Time Entry"
+        message="Are you sure you want to delete this time entry? This action cannot be undone."
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
       />
     </div>
   );

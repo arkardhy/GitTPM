@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { UserPlus, Trash2, Edit2 } from 'lucide-react';
+import { UserPlus, Download, Search, Edit2, Trash2 } from 'lucide-react';
 import { employeeService } from '../../../services/employeeService';
 import { exportToCSV } from '../../../utils/csv';
 import type { Employee } from '../../../types';
@@ -26,6 +26,7 @@ export function EmployeeList() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const [deleteConfirmation, setDeleteConfirmation] = useState<{
     show: boolean;
     employee: Employee | null;
@@ -50,6 +51,14 @@ export function EmployeeList() {
       setLoading(false);
     }
   }
+
+  const filteredEmployees = employees.filter(employee => {
+    const searchLower = searchQuery.toLowerCase();
+    return (
+      employee.name.toLowerCase().includes(searchLower) ||
+      employee.position.toLowerCase().includes(searchLower)
+    );
+  });
 
   const handleAddEmployee = async () => {
     try {
@@ -111,82 +120,102 @@ export function EmployeeList() {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-4 border-[#2D85B2] border-t-transparent"></div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white shadow rounded-lg">
-      <div className="px-4 py-5 sm:p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Anggota</h2>
-          <div className="space-x-4">
-            <Button
-              onClick={() => setShowAddModal(true)}
-              className="inline-flex items-center"
-            >
-              <UserPlus className="h-5 w-5 mr-2" />
-              Tambah Data
-            </Button>
-            <Button
-              onClick={handleExportCSV}
-              variant="secondary"
-              className="inline-flex items-center"
-            >
-              Export CSV
-            </Button>
+    <div className="bg-white rounded-xl shadow-lg">
+      <div className="p-6 space-y-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <h2 className="text-2xl font-bold text-[#105283]">Anggota</h2>
+          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+            <div className="relative flex-1 sm:flex-none">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Search className="h-5 w-5 text-gray-400" />
+              </div>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2D85B2] focus:border-transparent sm:text-sm"
+                placeholder="Search by name or position..."
+              />
+            </div>
+            <div className="flex gap-4">
+              <Button
+                onClick={() => setShowAddModal(true)}
+                className="bg-[#105283] hover:bg-[#0A3B5C] text-white inline-flex items-center"
+              >
+                <UserPlus className="h-5 w-5 mr-2" />
+                Add Employee
+              </Button>
+              <Button
+                onClick={handleExportCSV}
+                variant="secondary"
+                className="inline-flex items-center"
+              >
+                <Download className="h-5 w-5 mr-2" />
+                Export CSV
+              </Button>
+            </div>
           </div>
         </div>
 
         {error && (
-          <div className="mb-4 p-4 text-sm text-red-700 bg-red-100 rounded-lg">
+          <div className="p-4 text-sm text-red-700 bg-red-100 rounded-lg border border-red-200">
             {error}
           </div>
         )}
 
-        <div className="mt-8 flow-root">
-          <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-            <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-              <table className="min-w-full divide-y divide-gray-300">
-                <thead>
-                  <tr>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Nama</th>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Posisi</th>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Tanggal</th>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Rubah</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {employees.map((employee) => (
-                    <tr key={employee.id}>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900">{employee.name}</td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{employee.position}</td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {new Date(employee.joinDate).toLocaleDateString()}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        <div className="flex items-center space-x-4">
-                          <button
-                            onClick={() => handleEditClick(employee)}
-                            className="text-blue-600 hover:text-blue-900 p-1 rounded-full hover:bg-blue-50 transition-colors duration-200"
-                          >
-                            <Edit2 className="h-5 w-5" />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteClick(employee)}
-                            className="text-red-600 hover:text-red-900 p-1 rounded-full hover:bg-red-50 transition-colors duration-200"
-                          >
-                            <Trash2 className="h-5 w-5" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead>
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Position</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Join Date</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {filteredEmployees.map((employee) => (
+                <tr 
+                  key={employee.id}
+                  className="hover:bg-gray-50 transition-colors duration-200"
+                >
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    {employee.name}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {employee.position}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {new Date(employee.joinDate).toLocaleDateString()}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <div className="flex items-center space-x-3">
+                      <button
+                        onClick={() => handleEditClick(employee)}
+                        className="text-[#2D85B2] hover:text-[#105283] p-2 rounded-full hover:bg-[#F8FAFC] transition-colors duration-200"
+                        aria-label="Edit employee"
+                      >
+                        <Edit2 className="h-5 w-5" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteClick(employee)}
+                        className="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-colors duration-200"
+                        aria-label="Delete employee"
+                      >
+                        <Trash2 className="h-5 w-5" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -197,30 +226,30 @@ export function EmployeeList() {
         footer={
           <>
             <Button variant="secondary" onClick={() => setShowAddModal(false)}>
-              Batalkan
+              Cancel
             </Button>
-            <Button variant="primary" onClick={handleAddEmployee}>
-              Tambah Data
+            <Button onClick={handleAddEmployee}>
+              Add Employee
             </Button>
           </>
         }
       >
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Nama</label>
+            <label className="block text-sm font-medium text-gray-700">Name</label>
             <input
               type="text"
               value={newEmployee.name}
               onChange={(e) => setNewEmployee({ ...newEmployee, name: e.target.value })}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-[#2D85B2] focus:ring-[#2D85B2] sm:text-sm"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Posisi</label>
+            <label className="block text-sm font-medium text-gray-700">Position</label>
             <select
               value={newEmployee.position}
               onChange={(e) => setNewEmployee({ ...newEmployee, position: e.target.value })}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-[#2D85B2] focus:ring-[#2D85B2] sm:text-sm"
             >
               {POSITIONS.map((position) => (
                 <option key={position} value={position}>
@@ -248,10 +277,10 @@ export function EmployeeList() {
                 setEditingEmployee(null);
               }}
             >
-              Batalkan
+              Cancel
             </Button>
-            <Button variant="primary" onClick={handleEditSave}>
-              Simpan Data
+            <Button onClick={handleEditSave}>
+              Save Changes
             </Button>
           </>
         }
@@ -259,20 +288,20 @@ export function EmployeeList() {
         {editingEmployee && (
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">Nama</label>
+              <label className="block text-sm font-medium text-gray-700">Name</label>
               <input
                 type="text"
                 value={editingEmployee.name}
                 onChange={(e) => setEditingEmployee({ ...editingEmployee, name: e.target.value })}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-[#2D85B2] focus:ring-[#2D85B2] sm:text-sm"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Posisi</label>
+              <label className="block text-sm font-medium text-gray-700">Position</label>
               <select
                 value={editingEmployee.position}
                 onChange={(e) => setEditingEmployee({ ...editingEmployee, position: e.target.value })}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-[#2D85B2] focus:ring-[#2D85B2] sm:text-sm"
               >
                 {POSITIONS.map((position) => (
                   <option key={position} value={position}>
