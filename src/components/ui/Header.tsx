@@ -46,7 +46,7 @@ export function Header({ showNavigation = true, onLogout, onMenuToggle, children
                   className="hidden sm:flex bg-white/10 text-white border-white/20 hover:bg-white/20"
                 >
                   <LogOut className="h-5 w-5 mr-2" />
-                  Sign Out
+                  Keluar
                 </Button>
               )}
               {children}

@@ -61,27 +61,27 @@ export function AdminDashboard() {
     },
     {
       id: 'employees' as Tab,
-      name: 'Employees',
+      name: 'Anggota',
       icon: Users,
     },
     {
       id: 'leave-requests' as Tab,
-      name: 'Leave Requests',
+      name: 'Permintaan Cuti',
       icon: FileText,
     },
     {
       id: 'time-tracking' as Tab,
-      name: 'Time Tracking',
+      name: 'Lacak Jam Kerja',
       icon: Calendar,
     },
     {
       id: 'resignation-requests' as Tab,
-      name: 'Resignation Requests',
+      name: 'Pengunduran Diri',
       icon: FileText,
     },
     {
       id: 'wage-calculation' as Tab,
-      name: 'Pay Wage',
+      name: 'Gaji',
       icon: Calculator,
     },
   ];
