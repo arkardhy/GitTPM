@@ -33,33 +33,33 @@ export function RecentActivity({
   return (
     <div className="bg-white rounded-xl shadow-lg p-6">
       <div className="flex items-center gap-2 mb-6">
-        <Activity className="h-5 w-5 text-[#37b5fe]" />
-        <h2 className="text-lg font-semibold text-[#010407]">Recent Activity</h2>
+        <Activity className="h-5 w-5 text-[#2F8FC9]" />
+        <h2 className="text-lg font-semibold text-[#105283]">Recent Activity</h2>
       </div>
       
       <div className="space-y-4">
         {activities.map((activity, index) => (
           <div 
             key={index}
-            className="flex items-center gap-4 p-3 rounded-lg hover:bg-gray-50 transition-colors"
+            className="flex items-center gap-4 p-3 rounded-lg hover:bg-[#F8FAFC] transition-colors"
           >
             <div className={`w-2 h-2 rounded-full ${
-              activity.status === 'pending' ? 'bg-yellow-400' :
-              activity.status === 'approved' ? 'bg-green-400' :
+              activity.status === 'pending' ? 'bg-[#6EC7F7]' :
+              activity.status === 'approved' ? 'bg-[#2D85B2]' :
               'bg-red-400'
             }`} />
             <div className="flex-1">
-              <p className="text-sm text-[#164c6c]">
+              <p className="text-sm text-[#105283]">
                 <span className="font-medium">{activity.employee?.name}</span>
                 {' '}submitted a {activity.type} request
               </p>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-[#706B68] mt-1">
                 {formatDistanceToNow(activity.date, { addSuffix: true })}
               </p>
             </div>
             <span className={`text-xs px-2 py-1 rounded-full ${
-              activity.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-              activity.status === 'approved' ? 'bg-green-100 text-green-800' :
+              activity.status === 'pending' ? 'bg-[#6EC7F7]/10 text-[#206E9D]' :
+              activity.status === 'approved' ? 'bg-[#2D85B2]/10 text-[#105283]' :
               'bg-red-100 text-red-800'
             }`}>
               {activity.status}

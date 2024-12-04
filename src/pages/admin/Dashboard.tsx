@@ -88,41 +88,42 @@ export function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#37b5fe] border-t-transparent"></div>
+      <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#2D85B2] border-t-transparent"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#F8FAFC]">
       <Header 
         onLogout={handleLogout}
         onMenuToggle={() => setSidebarOpen(!sidebarOpen)}
       />
 
       <div className="flex h-screen pt-16 sm:pt-20">
-        {/* Sidebar for mobile */}
+        {/* Sidebar overlay */}
         <div
           className={`fixed inset-0 z-40 lg:hidden ${
             sidebarOpen ? 'block' : 'hidden'
           }`}
           onClick={() => setSidebarOpen(false)}
         >
-          <div className="fixed inset-0 bg-[#010407] bg-opacity-75" />
+          <div className="fixed inset-0 bg-[#080A0C] bg-opacity-75" />
         </div>
 
+        {/* Sidebar */}
         <div
           className={`fixed inset-y-0 left-0 z-50 w-64 bg-white transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${
             sidebarOpen ? 'translate-x-0' : '-translate-x-full'
           }`}
         >
           <div className="h-full flex flex-col">
-            <div className="flex items-center justify-between h-16 sm:h-20 px-4 border-b border-gray-200">
-              <span className="text-lg font-semibold text-[#164c6c]">Trans Kota Kita</span>
+            <div className="flex items-center justify-between h-16 sm:h-20 px-4 border-b border-[#92C0D8]/20">
+              <span className="text-lg font-semibold text-[#105283]">Trans Kota Kita</span>
               <button
                 onClick={() => setSidebarOpen(false)}
-                className="lg:hidden text-gray-500 hover:text-gray-700"
+                className="lg:hidden text-[#46525A] hover:text-[#105283]"
               >
                 <X className="h-6 w-6" />
               </button>
@@ -140,13 +141,13 @@ export function AdminDashboard() {
                     }}
                     className={`${
                       activeTab === item.id
-                        ? 'bg-[#37b5fe]/10 text-[#37b5fe] border-l-4 border-[#37b5fe]'
-                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                        ? 'bg-[#2D85B2]/10 text-[#2D85B2] border-l-4 border-[#2D85B2]'
+                        : 'text-[#46525A] hover:bg-[#F8FAFC] hover:text-[#105283]'
                     } group flex items-center px-3 py-3 text-sm font-medium rounded-md w-full transition-all duration-200`}
                   >
                     <Icon
                       className={`${
-                        activeTab === item.id ? 'text-[#37b5fe]' : 'text-gray-400 group-hover:text-gray-500'
+                        activeTab === item.id ? 'text-[#2D85B2]' : 'text-[#706B68] group-hover:text-[#105283]'
                       } mr-3 h-5 w-5 flex-shrink-0`}
                     />
                     {item.name}
@@ -155,11 +156,11 @@ export function AdminDashboard() {
               })}
             </nav>
 
-            <div className="p-4 border-t border-gray-200 lg:hidden">
+            <div className="p-4 border-t border-[#92C0D8]/20 lg:hidden">
               <Button
                 onClick={handleLogout}
                 variant="secondary"
-                className="w-full"
+                className="w-full bg-[#F8FAFC] text-[#46525A] hover:bg-[#92C0D8]/10 hover:text-[#105283]"
               >
                 <LogOut className="h-5 w-5 mr-2" />
                 Sign Out
@@ -168,11 +169,12 @@ export function AdminDashboard() {
           </div>
         </div>
 
-        <main className="flex-1 overflow-y-auto bg-gray-50">
+        {/* Main content */}
+        <main className="flex-1 overflow-y-auto bg-[#F8FAFC]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             {activeTab === 'dashboard' && (
               <div className="space-y-6">
-                <h1 className="text-2xl font-bold text-[#010407]">Dashboard Overview</h1>
+                <h1 className="text-2xl font-bold text-[#105283]">Dashboard Overview</h1>
                 <DashboardStats 
                   employees={employees}
                   leaveRequests={leaveRequests}

@@ -11,7 +11,7 @@ interface HeaderProps {
 export function Header({ showNavigation = true, onLogout, onMenuToggle, children }: HeaderProps) {
   return (
     <div className="fixed top-0 left-0 right-0 z-40">
-      <div className="h-16 sm:h-20 bg-gradient-to-r from-[#37b5fe] to-[#27acf9] shadow-lg">
+      <div className="h-16 sm:h-20 bg-gradient-to-r from-[#105283] to-[#2D85B2] shadow-lg">
         <nav className="h-full px-4 sm:px-6">
           <div className="h-full mx-auto flex items-center justify-between">
             <div className="flex items-center space-x-4">
