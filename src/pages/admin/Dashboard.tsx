@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { Users, LogOut, FileText, Calendar, Calculator, X } from 'lucide-react';
 import { storage } from '../../utils/storage';
 import { employeeService } from '../../services/employeeService';
+import { leaveRequestService } from '../../services/leaveRequestService';
+import { resignationService } from '../../services/resignationService';
 import { EmployeeList } from './components/EmployeeList';
 import { LeaveRequests } from './components/LeaveRequests';
 import { TimeTracking } from './components/TimeTracking';
@@ -10,26 +12,39 @@ import { ResignationRequests } from './components/ResignationRequests';
 import { WageCalculation } from './components/WageCalculation';
 import { Header } from '../../components/ui/Header';
 import { Button } from '../../components/ui/Button';
-import type { Employee } from '../../types';
+import { DashboardStats } from '../../components/ui/DashboardStats';
+import { RecentActivity } from '../../components/ui/RecentActivity';
+import type { Employee, LeaveRequest, ResignationRequest } from '../../types';
 
-type Tab = 'employees' | 'leave-requests' | 'time-tracking' | 'resignation-requests' | 'wage-calculation';
+type Tab = 'dashboard' | 'employees' | 'leave-requests' | 'time-tracking' | 'resignation-requests' | 'wage-calculation';
 
 export function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState<Tab>('employees');
+  const [activeTab, setActiveTab] = useState<Tab>('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [employees, setEmployees] = useState<Employee[]>([]);
+  const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>([]);
+  const [resignationRequests, setResignationRequests] = useState<ResignationRequest[]>([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
-    loadEmployees();
+    loadData();
   }, []);
 
-  async function loadEmployees() {
+  async function loadData() {
     try {
-      const data = await employeeService.getAll();
-      setEmployees(data);
+      const [emps, leaves, resignations] = await Promise.all([
+        employeeService.getAll(),
+        leaveRequestService.getAll(),
+        resignationService.getAll(),
+      ]);
+      setEmployees(emps);
+      setLeaveRequests(leaves);
+      setResignationRequests(resignations);
     } catch (err) {
-      console.error('Failed to load employees:', err);
+      console.error('Failed to load data:', err);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -39,6 +54,11 @@ export function AdminDashboard() {
   };
 
   const navItems = [
+    {
+      id: 'dashboard' as Tab,
+      name: 'Dashboard',
+      icon: Users,
+    },
     {
       id: 'employees' as Tab,
       name: 'Employees',
@@ -66,6 +86,14 @@ export function AdminDashboard() {
     },
   ];
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#37b5fe] border-t-transparent"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header 
@@ -81,7 +109,7 @@ export function AdminDashboard() {
           }`}
           onClick={() => setSidebarOpen(false)}
         >
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-75" />
+          <div className="fixed inset-0 bg-[#010407] bg-opacity-75" />
         </div>
 
         <div
@@ -91,7 +119,7 @@ export function AdminDashboard() {
         >
           <div className="h-full flex flex-col">
             <div className="flex items-center justify-between h-16 sm:h-20 px-4 border-b border-gray-200">
-              <span className="text-lg font-semibold text-gray-900">Admin Portal</span>
+              <span className="text-lg font-semibold text-[#164c6c]">Trans Kota Kita</span>
               <button
                 onClick={() => setSidebarOpen(false)}
                 className="lg:hidden text-gray-500 hover:text-gray-700"
@@ -112,13 +140,13 @@ export function AdminDashboard() {
                     }}
                     className={`${
                       activeTab === item.id
-                        ? 'bg-indigo-50 text-indigo-600 border-l-4 border-indigo-600'
+                        ? 'bg-[#37b5fe]/10 text-[#37b5fe] border-l-4 border-[#37b5fe]'
                         : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                     } group flex items-center px-3 py-3 text-sm font-medium rounded-md w-full transition-all duration-200`}
                   >
                     <Icon
                       className={`${
-                        activeTab === item.id ? 'text-indigo-600' : 'text-gray-400 group-hover:text-gray-500'
+                        activeTab === item.id ? 'text-[#37b5fe]' : 'text-gray-400 group-hover:text-gray-500'
                       } mr-3 h-5 w-5 flex-shrink-0`}
                     />
                     {item.name}
@@ -140,8 +168,27 @@ export function AdminDashboard() {
           </div>
         </div>
 
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto bg-gray-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            {activeTab === 'dashboard' && (
+              <div className="space-y-6">
+                <h1 className="text-2xl font-bold text-[#010407]">Dashboard Overview</h1>
+                <DashboardStats 
+                  employees={employees}
+                  leaveRequests={leaveRequests}
+                  resignationRequests={resignationRequests}
+                />
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  <div className="lg:col-span-2">
+                    <RecentActivity
+                      employees={employees}
+                      leaveRequests={leaveRequests}
+                      resignationRequests={resignationRequests}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
             {activeTab === 'employees' && <EmployeeList />}
             {activeTab === 'leave-requests' && <LeaveRequests />}
             {activeTab === 'time-tracking' && <TimeTracking />}
