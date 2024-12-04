@@ -117,9 +117,14 @@ export function EmployeePortal() {
       <main className="pt-16 sm:pt-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mx-auto">
           <div className="bg-white rounded-xl shadow-lg p-6 md:p-8">
-            <h1 className="text-2xl sm:text-3xl font-bold text-[#105283] text-center mb-8">
-              Trans Check Log
-            </h1>
+            <div className="flex items-center justify-center mb-8">
+              <div className="p-3 bg-gradient-to-br from-[#105283] to-[#2D85B2] rounded-full">
+                <UserCircle className="h-8 w-8 text-white" />
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-[#105283] ml-4">
+                Trans Check Log
+              </h1>
+            </div>
             
             {(dutyError || leaveError) && (
               <div className="mb-6 p-4 text-sm text-red-700 bg-red-100 rounded-lg border border-red-200">
@@ -139,29 +144,32 @@ export function EmployeePortal() {
 
             {selectedEmployee && (
               <div className="space-y-6">
-                <div className="bg-gradient-to-r from-[#105283] to-[#2D85B2] rounded-lg p-6 text-white">
+                <div className="bg-gradient-to-br from-[#105283] to-[#2D85B2] rounded-lg p-6 transform transition-all duration-200 hover:scale-[1.02]">
                   <div className="flex items-center space-x-4">
-                    <UserCircle className="h-16 w-16" />
+                    <div className="bg-white/10 rounded-full p-4">
+                      <UserCircle className="h-12 w-12 text-white" />
+                    </div>
                     <div>
-                      <h2 className="text-2xl font-bold">{selectedEmployee.name}</h2>
-                      <p className="text-[#E5F2F9]">{selectedEmployee.position}</p>
-                      <p className="text-sm mt-1 text-[#E5F2F9]">
-                        Status: <span className={isOnDuty ? "text-green-300" : "text-yellow-300"}>
+                      <h2 className="text-2xl font-bold text-white">{selectedEmployee.name}</h2>
+                      <p className="text-[#E5F2F9] opacity-90">{selectedEmployee.position}</p>
+                      <div className="flex items-center mt-2">
+                        <div className={`w-2 h-2 rounded-full ${isOnDuty ? 'bg-green-400' : 'bg-yellow-400'} mr-2`}></div>
+                        <p className="text-sm text-[#E5F2F9]">
                           {isOnDuty ? "On Duty" : "Off Duty"}
-                        </span>
-                      </p>
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 <EmployeeStats employee={selectedEmployee} />
 
-                <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
                   <Button
                     onClick={() => startDuty(selectedEmployee)}
                     disabled={isOnDuty || isDutyProcessing}
                     variant={isOnDuty ? 'secondary' : 'primary'}
-                    className="h-14 relative bg-[#105283] hover:bg-[#0A3B5C]"
+                    className="h-14 relative bg-[#105283] hover:bg-[#0A3B5C] transition-all duration-200"
                   >
                     {isDutyProcessing ? (
                       <div className="absolute inset-0 flex items-center justify-center">
@@ -169,8 +177,8 @@ export function EmployeePortal() {
                       </div>
                     ) : (
                       <>
-                        <Clock className="h-6 w-6 mr-2" />
-                        <span>On Duty</span>
+                        <Clock className="h-5 w-5 sm:h-6 sm:w-6 mr-2" />
+                        <span className="text-sm sm:text-base">On Duty</span>
                       </>
                     )}
                   </Button>
@@ -178,7 +186,7 @@ export function EmployeePortal() {
                     onClick={() => endDuty(selectedEmployee)}
                     disabled={!isOnDuty || isDutyProcessing}
                     variant={!isOnDuty ? 'secondary' : 'danger'}
-                    className="h-14 relative"
+                    className="h-14 relative transition-all duration-200"
                   >
                     {isDutyProcessing ? (
                       <div className="absolute inset-0 flex items-center justify-center">
@@ -186,8 +194,8 @@ export function EmployeePortal() {
                       </div>
                     ) : (
                       <>
-                        <Clock className="h-6 w-6 mr-2" />
-                        <span>Off Duty</span>
+                        <Clock className="h-5 w-5 sm:h-6 sm:w-6 mr-2" />
+                        <span className="text-sm sm:text-base">Off Duty</span>
                       </>
                     )}
                   </Button>
@@ -195,10 +203,10 @@ export function EmployeePortal() {
                     onClick={() => setShowLeaveModal(true)}
                     variant="primary"
                     disabled={isDutyProcessing || isLeaveProcessing}
-                    className="h-14 bg-[#2D85B2] hover:bg-[#206E9D]"
+                    className="h-14 bg-[#2D85B2] hover:bg-[#206E9D] transition-all duration-200"
                   >
-                    <Calendar className="h-6 w-6 mr-2" />
-                    <span>Ajukan Cuti</span>
+                    <Calendar className="h-5 w-5 sm:h-6 sm:w-6 mr-2" />
+                    <span className="text-sm sm:text-base">Cuti</span>
                   </Button>
                   <ResignationForm 
                     employee={selectedEmployee}
@@ -247,7 +255,7 @@ export function EmployeePortal() {
               type="date"
               value={leaveRequest.startDate}
               onChange={(e) => setLeaveRequest({ ...leaveRequest, startDate: e.target.value })}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#2D85B2] focus:ring-[#2D85B2] sm:text-sm"
+              className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-[#2D85B2] focus:ring-[#2D85B2] sm:text-sm"
               min={new Date().toISOString().split('T')[0]}
             />
           </div>
@@ -257,7 +265,7 @@ export function EmployeePortal() {
               type="date"
               value={leaveRequest.endDate}
               onChange={(e) => setLeaveRequest({ ...leaveRequest, endDate: e.target.value })}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#2D85B2] focus:ring-[#2D85B2] sm:text-sm"
+              className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-[#2D85B2] focus:ring-[#2D85B2] sm:text-sm"
               min={leaveRequest.startDate || new Date().toISOString().split('T')[0]}
             />
           </div>
@@ -267,8 +275,8 @@ export function EmployeePortal() {
               value={leaveRequest.reason}
               onChange={(e) => setLeaveRequest({ ...leaveRequest, reason: e.target.value })}
               rows={3}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#2D85B2] focus:ring-[#2D85B2] sm:text-sm"
-              placeholder="Please provide a detailed reason for your leave request..."
+              className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-[#2D85B2] focus:ring-[#2D85B2] sm:text-sm"
+              placeholder="Berikan alasan cuti anda..."
             />
           </div>
         </div>

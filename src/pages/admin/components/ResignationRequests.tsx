@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Check, X, FileText, Trash2 } from 'lucide-react';
+import { Download, Search, FileText } from 'lucide-react';
 import { employeeService } from '../../../services/employeeService';
 import { resignationService } from '../../../services/resignationService';
 import { discordNotifications } from '../../../utils/discord';
@@ -7,6 +7,9 @@ import { exportToCSV } from '../../../utils/csv';
 import type { Employee, ResignationRequest } from '../../../types';
 import { Button } from '../../../components/ui/Button';
 import { Modal } from '../../../components/ui/Modal';
+import { SearchBar } from '../../../components/ui/SearchBar';
+import { ResignationGrid } from '../../../components/resignation/ResignationGrid';
+import { formatDayMonthYear } from '../../../utils/dateTime';
 
 export function ResignationRequests() {
   const [requests, setRequests] = useState<ResignationRequest[]>([]);
@@ -15,6 +18,7 @@ export function ResignationRequests() {
   const [error, setError] = useState<string | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<ResignationRequest | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     loadData();
@@ -110,124 +114,91 @@ export function ResignationRequests() {
         'Employee Name': employee?.name || 'Unknown',
         'Position': employee?.position || 'Unknown',
         'Passport': request.passport,
-        'Request Date': new Date(request.requestDate).toLocaleDateString(),
+        'Request Date': formatDayMonthYear(request.requestDate),
         'Status': request.status.charAt(0).toUpperCase() + request.status.slice(1),
-        'Created At': new Date(request.createdAt).toLocaleString(),
+        'Created At': formatDayMonthYear(request.createdAt),
+        'Reason (IC)': request.reasonIC,
+        'Reason (OOC)': request.reasonOOC,
       };
     });
     exportToCSV(exportData, 'resignation-requests');
   };
 
+  const filteredRequests = requests
+    .filter(request => {
+      const employee = employees.find(emp => emp.id === request.employeeId);
+      const searchLower = searchQuery.toLowerCase();
+      
+      return (
+        employee?.name.toLowerCase().includes(searchLower) ||
+        employee?.position.toLowerCase().includes(searchLower) ||
+        request.passport.toLowerCase().includes(searchLower) ||
+        request.reasonIC.toLowerCase().includes(searchLower) ||
+        request.reasonOOC.toLowerCase().includes(searchLower)
+      );
+    })
+    .map(request => ({
+      request,
+      employeeName: employees.find(emp => emp.id === request.employeeId)?.name || 'Unknown',
+      employeePosition: employees.find(emp => emp.id === request.employeeId)?.position || 'Unknown',
+    }));
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-4 border-[#2D85B2] border-t-transparent"></div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white shadow rounded-lg">
-      <div className="px-4 py-5 sm:p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Permintaan Pengunduran Diri</h2>
-          <button
-            onClick={handleExportCSV}
-            className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-          >
-            Export CSV
-          </button>
+    <div className="bg-white rounded-xl shadow-lg">
+      <div className="p-6 space-y-6">
+        {/* Header */}
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+          <div className="flex items-center space-x-3">
+            <div className="p-2 bg-[#105283]/10 rounded-lg">
+              <FileText className="h-6 w-6 text-[#105283]" />
+            </div>
+            <h2 className="text-2xl font-bold text-[#105283]">Resignation Requests</h2>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
+            <div className="relative flex-1 sm:w-64">
+              <SearchBar
+                value={searchQuery}
+                onChange={setSearchQuery}
+                placeholder="Search requests..."
+              />
+            </div>
+
+            <Button
+              onClick={handleExportCSV}
+              variant="secondary"
+              className="inline-flex items-center"
+            >
+              <Download className="h-5 w-5 mr-2" />
+              Export CSV
+            </Button>
+          </div>
         </div>
 
         {error && (
-          <div className="mb-4 p-4 text-sm text-red-700 bg-red-100 rounded-lg">
+          <div className="p-4 text-sm text-red-700 bg-red-50 rounded-lg border border-red-100">
             {error}
           </div>
         )}
 
-        <div className="mt-8 flow-root">
-          <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-            <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-              <table className="min-w-full divide-y divide-gray-300">
-                <thead>
-                  <tr>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Nama</th>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Posisi</th>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Pengajuan</th>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Status</th>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Rubah</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {requests.map((request) => {
-                    const employee = employees.find(emp => emp.id === request.employeeId);
-                    return (
-                      <tr key={request.id}>
-                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
-                          {employee?.name || 'Unknown'}
-                        </td>
-                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                          {employee?.position || 'Unknown'}
-                        </td>
-                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                          {new Date(request.requestDate).toLocaleDateString()}
-                        </td>
-                        <td className="whitespace-nowrap px-3 py-4 text-sm">
-                          <span
-                            className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${
-                              request.status === 'approved'
-                                ? 'bg-green-100 text-green-800'
-                                : request.status === 'rejected'
-                                ? 'bg-red-100 text-red-800'
-                                : 'bg-yellow-100 text-yellow-800'
-                            }`}
-                          >
-                            {request.status}
-                          </span>
-                        </td>
-                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                          <div className="flex space-x-2">
-                            <button
-                              onClick={() => {
-                                setSelectedRequest(request);
-                                setShowDetailsModal(true);
-                              }}
-                              className="text-blue-600 hover:text-blue-900"
-                            >
-                              <FileText className="h-5 w-5" />
-                            </button>
-                            {request.status === 'pending' && (
-                              <>
-                                <button
-                                  onClick={() => handleApprove(request)}
-                                  className="text-green-600 hover:text-green-900"
-                                >
-                                  <Check className="h-5 w-5" />
-                                </button>
-                                <button
-                                  onClick={() => handleReject(request)}
-                                  className="text-red-600 hover:text-red-900"
-                                >
-                                  <X className="h-5 w-5" />
-                                </button>
-                              </>
-                            )}
-                            <button
-                              onClick={() => handleDelete(request)}
-                              className="text-red-600 hover:text-red-900"
-                            >
-                              <Trash2 className="h-5 w-5" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+        <ResignationGrid
+          requests={filteredRequests}
+          onApprove={(request) => handleApprove(request)}
+          onReject={(request) => handleReject(request)}
+          onDelete={(request) => handleDelete(request)}
+          onViewDetails={(request) => {
+            setSelectedRequest(request);
+            setShowDetailsModal(true);
+          }}
+        />
       </div>
 
       <Modal
@@ -245,7 +216,7 @@ export function ResignationRequests() {
               setSelectedRequest(null);
             }}
           >
-            Tutup
+            Close
           </Button>
         }
       >
@@ -256,23 +227,23 @@ export function ResignationRequests() {
               <p className="mt-1 text-sm text-gray-900">{selectedRequest.passport}</p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Alasan (In Character)</label>
+              <label className="block text-sm font-medium text-gray-700">Reason (In Character)</label>
               <p className="mt-1 text-sm text-gray-900 whitespace-pre-wrap">{selectedRequest.reasonIC}</p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Alasan (Out of Character)</label>
+              <label className="block text-sm font-medium text-gray-700">Reason (Out of Character)</label>
               <p className="mt-1 text-sm text-gray-900 whitespace-pre-wrap">{selectedRequest.reasonOOC}</p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Tanggal Pengajuan</label>
+              <label className="block text-sm font-medium text-gray-700">Request Date</label>
               <p className="mt-1 text-sm text-gray-900">
-                {new Date(selectedRequest.requestDate).toLocaleDateString()}
+                {formatDayMonthYear(selectedRequest.requestDate)}
               </p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Tanggal Permintaan</label>
+              <label className="block text-sm font-medium text-gray-700">Submission Date</label>
               <p className="mt-1 text-sm text-gray-900">
-                {new Date(selectedRequest.createdAt).toLocaleString()}
+                {formatDayMonthYear(selectedRequest.createdAt)}
               </p>
             </div>
           </div>
